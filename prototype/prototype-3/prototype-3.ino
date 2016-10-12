@@ -1,5 +1,6 @@
-//#define COMPONENT_TESTING_ROTATION_COAST
-//#define KILLALL
+//#define COMPONENT_TEST_MOTOR_COAST
+//#define COMPONENT_TEST_MOTOR_TIME
+//#define KILLALL // Uncomment this to kill the system, and stop all components
 
 #define MOTOR_1_PIN 12
 #define MOTOR_2_PIN 11
@@ -45,9 +46,14 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(MOTOR_2_INT_PIN), motor2_interrupt, CHANGE);
   //attachInterrupt(digitalPinToInterrupt(MOTOR_3_INT_PIN), motor3_interrupt, CHANGE);
 
-#ifdef COMPONENT_TESTING_ROTATION_COAST
+#ifdef COMPONENT_TEST_MOTOR_COAST
   component_test_motor_coast(&motor1);
 #endif
+
+#ifdef COMPONENT_TEST_MOTOR_TIME
+  component_test_motor_time(&motor1);
+#endif
+
 }
 
 void motor1_interrupt() {
@@ -104,7 +110,7 @@ void loop() {
 /*****************************
    COMPONENT TESTING METHODS
  *****************************/
-
+#ifdef COMPONENT_TEST_MOTOR_COAST
 void component_test_motor_coast(Motor* motor) {
   for (int i = 0; i < 20; i++) {
     motor->deg = 0;
@@ -119,3 +125,23 @@ void component_test_motor_coast(Motor* motor) {
     delay(500);                 // Should be 360 + coast degrees for the motor.
   }
 }
+#endif
+
+#ifdef COMPONENT_TEST_MOTOR_TIME
+void component_test_motor_time(Motor* motor) {
+  for (int i = 0; i < 20; i++) {
+    motor->deg = 0;
+    unsigned long t_start = millis();
+    motor_turn_deg(motor, 360, COUNTERCLOCKWISE);
+    unsigned long t_end = millis();
+    if (motor->deg < 360) {
+      Serial.println("ERROR");
+      exit(0);
+    }
+
+    Serial.println(t_end-t_start);
+    delay(1000);
+  }
+}
+#endif
+
