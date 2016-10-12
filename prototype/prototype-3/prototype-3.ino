@@ -23,10 +23,10 @@ struct Motor {
 Motor motor1, motor2, motor3;
 
 void setup() {
-  #ifdef KILLALL
+#ifdef KILLALL
   exit(0);
-  #endif
-  
+#endif
+
   motor1.pin = MOTOR_1_PIN;
   motor2.pin = MOTOR_2_PIN;
   //motor3.pin = MOTOR_3_PIN;
@@ -45,21 +45,9 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(MOTOR_2_INT_PIN), motor2_interrupt, CHANGE);
   //attachInterrupt(digitalPinToInterrupt(MOTOR_3_INT_PIN), motor3_interrupt, CHANGE);
 
-  #ifdef COMPONENT_TESTING_ROTATION_COAST
-  for (int i = 0; i < 20; i++) {
-    motor1.deg = 0;
-    motor_turn_deg(&motor1, 360, COUNTERCLOCKWISE);
-    if (motor1.deg < 360) {     // In case it happens that the loop breaks out before 360 degrees
-      Serial.println("ERROR");  // thrown an error, because that is not supposed to happen.
-      exit(0);                  // The error should be fixed, but cant be sure yet.
-    }
-
-    delay(1000);
-    Serial.println(motor1.deg); // Value used for component testing.
-                                // Should be 360 + coast degrees for the motor.
-    delay(500);
-  }
-  #endif
+#ifdef COMPONENT_TESTING_ROTATION_COAST
+  component_test_motor_coast(&motor1);
+#endif
 }
 
 void motor1_interrupt() {
@@ -77,7 +65,7 @@ void motor3_interrupt() {
 void motor_turn_deg(Motor* motor, int deg, Turning_Direction dir)
 {
   int goal = motor->deg + (deg * dir);
- 
+
   motor_turn(motor, dir);
 
   switch (motor->dir) {
@@ -113,3 +101,21 @@ void loop() {
   // put your main code here, to run repeatedly:
 }
 
+/*****************************
+   COMPONENT TESTING METHODS
+ *****************************/
+
+void component_test_motor_coast(Motor* motor) {
+  for (int i = 0; i < 20; i++) {
+    motor->deg = 0;
+    motor_turn_deg(motor, 360, COUNTERCLOCKWISE);
+    if (motor->deg < 360) {     // In case it happens that the loop breaks out before 360 degrees
+      Serial.println("ERROR");  // thrown an error, because that is not supposed to happen.
+      exit(0);                  // The error should be fixed, but cant be sure yet.
+    }
+
+    delay(1000);
+    Serial.println(motor->deg); // Value used for component testing.
+    delay(500);                 // Should be 360 + coast degrees for the motor.
+  }
+}
