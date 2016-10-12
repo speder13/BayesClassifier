@@ -1,6 +1,17 @@
+//#define COMPONENT_TESTING_ROTATION_COAST
+//#define KILLALL
+
+#define MOTOR_1_PIN 12
+#define MOTOR_2_PIN 11
+#define MOTOR_3_PIN
+
+#define MOTOR_1_INT_PIN 3
+#define MOTOR_2_INT_PIN 2
+#define MOTOR_3_INT_PIN
+
 enum Turning_Direction {
-  CLOCKWISE        = -1,
-  COUNTERCLOCKWISE = 1
+  CLOCKWISE         = -1,
+  COUNTERCLOCKWISE  = 1
 };
 
 struct Motor {
@@ -9,66 +20,90 @@ struct Motor {
   Turning_Direction dir = CLOCKWISE;
 };
 
-Motor motor1;
+Motor motor1, motor2, motor3;
 
-void setup() { 
-  motor1.pin = 12;
-
-  // put your setup code here, to run once:
-  Serial.begin(9200);
+void setup() {
+  #ifdef KILLALL
+  exit(0);
+  #endif
   
-  pinMode(2, INPUT);
-  pinMode(3, INPUT);
-  pinMode(18, INPUT);
+  motor1.pin = MOTOR_1_PIN;
+  motor2.pin = MOTOR_2_PIN;
+  //motor3.pin = MOTOR_3_PIN;
+
+  Serial.begin(9200);
+
+  pinMode(MOTOR_1_INT_PIN, INPUT_PULLUP);
+  pinMode(MOTOR_2_INT_PIN, INPUT_PULLUP);
+  //pinMode(MOTOR_3_INT_PIN, INPUT_PULLUP);
 
   pinMode(motor1.pin, OUTPUT);
+  pinMode(motor2.pin, OUTPUT);
+  //pinMode(motor3.pin, OUTPUT);
 
-  //attachInterrupt(digitalPinToInterrupt(2), int2, CHANGE); // 0 is interrupt number, listens at pin 2
-  attachInterrupt(digitalPinToInterrupt(3), motor1_interrupt, CHANGE); // 1 is interrupt number, listens at pin 3
-  //attachInterrupt(digitalPinToInterrupt(18), button_clicked, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(MOTOR_1_INT_PIN), motor1_interrupt, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(MOTOR_2_INT_PIN), motor2_interrupt, CHANGE);
+  //attachInterrupt(digitalPinToInterrupt(MOTOR_3_INT_PIN), motor3_interrupt, CHANGE);
 
-  //motor_turn(&motor1, CLOCKWISE);
-  //motor_stop(&motor1);
-  motor_turn_deg(&motor1, 360, CLOCKWISE);
-}
+  #ifdef COMPONENT_TESTING_ROTATION_COAST
+  for (int i = 0; i < 20; i++) {
+    motor1.deg = 0;
+    motor_turn_deg(&motor1, 360, COUNTERCLOCKWISE);
+    if (motor1.deg < 360) {     // In case it happens that the loop breaks out before 360 degrees
+      Serial.println("ERROR");  // thrown an error, because that is not supposed to happen.
+      exit(0);                  // The error should be fixed, but cant be sure yet.
+    }
 
-void button_clicked() {
-  Serial.println("I was clicked!");
-  motor_stop(&motor1);
-}
-
-void int2() {
-  // Serial.println("Int2");
+    delay(1000);
+    Serial.println(motor1.deg); // Value used for component testing.
+                                // Should be 360 + coast degrees for the motor.
+    delay(500);
+  }
+  #endif
 }
 
 void motor1_interrupt() {
   motor1.deg += motor1.dir;
 }
 
-void motor_turn_deg(Motor* motor, int deg, Turning_Direction dir) 
+void motor2_interrupt() {
+  motor2.deg += motor2.dir;
+}
+
+void motor3_interrupt() {
+  motor3.deg += motor3.dir;
+}
+
+void motor_turn_deg(Motor* motor, int deg, Turning_Direction dir)
 {
   int goal = motor->deg + (deg * dir);
-
+ 
   motor_turn(motor, dir);
 
   switch (motor->dir) {
     case CLOCKWISE:
-      while (goal <= motor->deg) ;
+      while (goal <= motor->deg) {
+        delay(1);
+      }
       break;
     case COUNTERCLOCKWISE:
-      while (goal >= motor->deg) ;
+      while (goal >= motor->deg) {
+        delay(1);
+      }
+      break;
+    default:
+      Serial.println("NO ROTATION");
       break;
   }
-  
   motor_stop(motor);
 }
 
-void motor_stop(Motor* motor) 
+void motor_stop(Motor* motor)
 {
   digitalWrite(motor->pin, LOW);
 }
 
-void motor_turn(Motor* motor, Turning_Direction dir) 
+void motor_turn(Motor* motor, Turning_Direction dir)
 {
   motor->dir = dir;
   digitalWrite(motor->pin, HIGH);
@@ -77,3 +112,4 @@ void motor_turn(Motor* motor, Turning_Direction dir)
 void loop() {
   // put your main code here, to run repeatedly:
 }
+
