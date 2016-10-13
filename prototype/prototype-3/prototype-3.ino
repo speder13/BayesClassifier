@@ -1,5 +1,6 @@
 //#define COMPONENT_TEST_MOTOR_COAST
 //#define COMPONENT_TEST_MOTOR_TIME
+#define COMPONENT_TEST_INTERUPT_COST
 //#define KILLALL // Uncomment this to kill the system, and stop all components
 
 #define MOTOR_1_PIN 12
@@ -17,7 +18,7 @@ enum Turning_Direction {
 
 struct Motor {
   int pin = 0;
-  volatile int deg = 0;
+  volatile long deg = 0;
   Turning_Direction dir = CLOCKWISE;
 };
 
@@ -32,7 +33,7 @@ void setup() {
   motor2.pin = MOTOR_2_PIN;
   //motor3.pin = MOTOR_3_PIN;
 
-  Serial.begin(9200);
+  Serial.begin(9600);
 
   pinMode(MOTOR_1_INT_PIN, INPUT_PULLUP);
   pinMode(MOTOR_2_INT_PIN, INPUT_PULLUP);
@@ -47,11 +48,18 @@ void setup() {
   //attachInterrupt(digitalPinToInterrupt(MOTOR_3_INT_PIN), motor3_interrupt, CHANGE);
 
 #ifdef COMPONENT_TEST_MOTOR_COAST
+  Serial.println("Component Test: Motor Coast");
   component_test_motor_coast(&motor1);
 #endif
 
 #ifdef COMPONENT_TEST_MOTOR_TIME
+  Serial.println("Component Test: Motor Time");
   component_test_motor_time(&motor1);
+#endif
+
+#ifdef COMPONENT_TEST_INTERUPT_COST
+  Serial.println("Component Test: Interupt Cost");
+  component_test_interupt_cost();
 #endif
 
 }
@@ -145,3 +153,72 @@ void component_test_motor_time(Motor* motor) {
 }
 #endif
 
+#ifdef COMPONENT_TEST_INTERUPT_COST
+void component_test_interupt_cost(){
+  const int test_count = 10;
+  const long iterations = 500000;
+  
+  long time_start, time_end, interrupt_count_start, interrupt_count_end;
+  long no_interrupt_times[test_count], interrupt_times[test_count], interrupt_counts[test_count];
+
+  // run measurements without a motor running
+  for (int i = 0; i < test_count; i++){  
+    time_start = micros();
+    for (volatile long j = 0; j < iterations; j++);
+    time_end = micros();
+  
+    no_interrupt_times[i] = time_end - time_start;
+  }
+
+  // run measurements with a motor running
+  motor_turn(&motor1, COUNTERCLOCKWISE);
+  delay(2500);
+  for (int i = 0; i < test_count; i++){
+    interrupt_count_start = motor1.deg;
+    time_start = micros();
+    for (volatile long j = 0; j < iterations; j++);
+    time_end = micros();
+    interrupt_count_end = motor1.deg;
+    
+    interrupt_times[i] = time_end - time_start;
+    interrupt_counts[i] = interrupt_count_end - interrupt_count_start;
+  }
+    
+  motor_stop(&motor1);
+  
+  long average_no_interrupt_time = 0, average_interrupt_time = 0, average_interrupt_count = 0;
+
+  // print result table
+  Serial.println("| with       | without    | count      | est cost   |");
+  for (int i = 0; i < test_count; i++){
+    Serial.print("|    ");
+    Serial.print(interrupt_times[i]);
+    Serial.print(" |    ");
+    Serial.print(no_interrupt_times[i]);
+    Serial.print(" |        ");
+    Serial.print(interrupt_counts[i]);
+    Serial.print(" | ");
+    Serial.print((interrupt_times[i] - no_interrupt_times[i]) / (double)interrupt_counts[i], 8);
+    Serial.println(" |");
+
+    average_no_interrupt_time += no_interrupt_times[i];
+    average_interrupt_time += interrupt_times[i];
+    average_interrupt_count += interrupt_counts[i];
+  }
+
+  average_no_interrupt_time /= test_count;
+  average_interrupt_time /= test_count;
+  average_interrupt_count /= test_count; 
+  
+  Serial.println("-----------------------------------------------------");
+  Serial.print("|    ");
+  Serial.print(average_interrupt_time);
+  Serial.print(" |    ");
+  Serial.print(average_no_interrupt_time);
+  Serial.print(" |        ");
+  Serial.print(average_interrupt_count);
+  Serial.print(" | ");
+  Serial.print((average_interrupt_time - average_no_interrupt_time) / (double)average_interrupt_count, 8);
+  Serial.println(" |");
+}
+#endif
