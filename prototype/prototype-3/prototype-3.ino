@@ -1,6 +1,7 @@
 //#define COMPONENT_TEST_MOTOR_COAST
 //#define COMPONENT_TEST_MOTOR_TIME
-#define COMPONENT_TEST_INTERUPT_COST
+#define COMPONENT_TEST_INTERRUPT_COST
+//#define API_TEST_MOTOR_TURN_DEG
 //#define KILLALL // Uncomment this to kill the system, and stop all components
 
 #define MOTOR_1_PIN 12
@@ -23,6 +24,9 @@ struct Motor {
 };
 
 Motor motor1, motor2, motor3;
+
+
+
 
 void setup() {
 #ifdef KILLALL
@@ -57,9 +61,14 @@ void setup() {
   component_test_motor_time(&motor1);
 #endif
 
-#ifdef COMPONENT_TEST_INTERUPT_COST
+#ifdef COMPONENT_TEST_INTERRUPT_COST
   Serial.println("Component Test: Interupt Cost");
   component_test_interupt_cost();
+#endif
+
+#ifdef API_TEST_MOTOR_TURN_DEG
+  Serial.println("API Test: Interupt Cost");
+  api_test_motor_turn_deg();
 #endif
 
 }
@@ -153,10 +162,45 @@ void component_test_motor_time(Motor* motor) {
 }
 #endif
 
-#ifdef COMPONENT_TEST_INTERUPT_COST
+#ifdef COMPONENT_TEST_INTERRUPT_COST
+void print_formatted_number(long number, int total_size){
+  bool leading_zeros = true;
+  
+  for (; total_size > 0; total_size--){
+    long power = (long)pow(10, total_size - 1);
+    long digit = number / power;
+
+    if (leading_zeros && digit != 0)
+      leading_zeros = false;
+      
+    if (leading_zeros)
+      Serial.print(" ");
+    else{
+      Serial.print(number / power);
+    }
+    
+    number -= digit * power;
+  }
+}
+
+void print_table_row(long with, long without, long delta, long count, double est_cost){
+  Serial.print("| ");
+  print_formatted_number(with, 10);
+  Serial.print(" | ");
+  print_formatted_number(without, 10);
+  Serial.print(" | ");
+  print_formatted_number(delta, 10);
+  Serial.print(" | ");
+  print_formatted_number(count, 10);
+  Serial.print(" | ");
+  Serial.print(est_cost, 8);
+  Serial.println(" |");
+}
+
+
 void component_test_interupt_cost(){
   const int test_count = 10;
-  const long iterations = 500000;
+  const long iterations = 50000;
   
   long time_start, time_end, interrupt_count_start, interrupt_count_end;
   long no_interrupt_times[test_count], interrupt_times[test_count], interrupt_counts[test_count];
@@ -186,39 +230,27 @@ void component_test_interupt_cost(){
     
   motor_stop(&motor1);
   
-  long average_no_interrupt_time = 0, average_interrupt_time = 0, average_interrupt_count = 0;
+  long average_no_interrupt_time = 0, average_interrupt_time = 0, average_interrupt_count = 0, delta;
 
   // print result table
-  Serial.println("| with       | without    | count      | est cost   |");
+  Serial.println("| with       | without    | delta      | count      | est cost   |");
   for (int i = 0; i < test_count; i++){
-    Serial.print("|    ");
-    Serial.print(interrupt_times[i]);
-    Serial.print(" |    ");
-    Serial.print(no_interrupt_times[i]);
-    Serial.print(" |        ");
-    Serial.print(interrupt_counts[i]);
-    Serial.print(" | ");
-    Serial.print((interrupt_times[i] - no_interrupt_times[i]) / (double)interrupt_counts[i], 8);
-    Serial.println(" |");
+    delta = interrupt_times[i] - no_interrupt_times[i];
+    print_table_row(interrupt_times[i], no_interrupt_times[i], interrupt_counts[i], delta,
+                    delta / (double)interrupt_counts[i]);
 
-    average_no_interrupt_time += no_interrupt_times[i];
     average_interrupt_time += interrupt_times[i];
+    average_no_interrupt_time += no_interrupt_times[i];
     average_interrupt_count += interrupt_counts[i];
   }
 
   average_no_interrupt_time /= test_count;
   average_interrupt_time /= test_count;
   average_interrupt_count /= test_count; 
+  delta = average_interrupt_time - average_no_interrupt_time;
   
-  Serial.println("-----------------------------------------------------");
-  Serial.print("|    ");
-  Serial.print(average_interrupt_time);
-  Serial.print(" |    ");
-  Serial.print(average_no_interrupt_time);
-  Serial.print(" |        ");
-  Serial.print(average_interrupt_count);
-  Serial.print(" | ");
-  Serial.print((average_interrupt_time - average_no_interrupt_time) / (double)average_interrupt_count, 8);
-  Serial.println(" |");
+  Serial.println("------------------------------------------------------------------");
+  print_table_row(average_interrupt_time, average_no_interrupt_time, average_interrupt_count, delta,
+                  delta / (double)average_interrupt_count);
 }
 #endif
