@@ -124,9 +124,9 @@ void loop() {
   // put your main code here, to run repeatedly:
 }
 
-/*****************************
-   COMPONENT TESTING METHODS
- *****************************/
+/*******************************
+   COMPONENT TESTING FUNCTIONS
+ *******************************/
 #ifdef COMPONENT_TEST_MOTOR_COAST
 void component_test_motor_coast(Motor* motor) {
   for (int i = 0; i < 20; i++) {
