@@ -4,11 +4,11 @@
 //#define API_TEST_MOTOR_TURN_DEG
 //#define KILLALL // Uncomment this to kill the system, and stop all components
 
-#define MOTOR_1_PIN 12
+#define MOTOR_1_PIN 4
 #define MOTOR_2_PIN 11
 #define MOTOR_3_PIN
 
-#define MOTOR_1_INT_PIN 3
+#define MOTOR_1_INT_PIN 2
 #define MOTOR_2_INT_PIN 2
 #define MOTOR_3_INT_PIN
 
@@ -20,7 +20,11 @@ enum Turning_Direction {
 struct Motor {
   int pin = 0;
   volatile long deg = 0;
-  Turning_Direction dir = CLOCKWISE;
+  Turning_Direction dir = COUNTERCLOCKWISE;
+};
+
+struct Advanced_Motor {
+  Motor base;
 };
 
 Motor motor1, motor2, motor3;
@@ -40,15 +44,15 @@ void setup() {
   Serial.begin(9600);
 
   pinMode(MOTOR_1_INT_PIN, INPUT_PULLUP);
-  pinMode(MOTOR_2_INT_PIN, INPUT_PULLUP);
+  //pinMode(MOTOR_2_INT_PIN, INPUT_PULLUP);
   //pinMode(MOTOR_3_INT_PIN, INPUT_PULLUP);
 
   pinMode(motor1.pin, OUTPUT);
-  pinMode(motor2.pin, OUTPUT);
+  //pinMode(motor2.pin, OUTPUT);
   //pinMode(motor3.pin, OUTPUT);
 
   attachInterrupt(digitalPinToInterrupt(MOTOR_1_INT_PIN), motor1_interrupt, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(MOTOR_2_INT_PIN), motor2_interrupt, CHANGE);
+  //attachInterrupt(digitalPinToInterrupt(MOTOR_2_INT_PIN), motor2_interrupt, CHANGE);
   //attachInterrupt(digitalPinToInterrupt(MOTOR_3_INT_PIN), motor3_interrupt, CHANGE);
 
 #ifdef COMPONENT_TEST_MOTOR_COAST
@@ -67,10 +71,9 @@ void setup() {
 #endif
 
 #ifdef API_TEST_MOTOR_TURN_DEG
-  Serial.println("API Test: Interupt Cost");
+  Serial.println("API Test: Test Motor Deg");
   api_test_motor_turn_deg();
 #endif
-
 }
 
 void motor1_interrupt() {
@@ -167,23 +170,37 @@ void print_formatted_number(long number, int total_size){
   bool leading_zeros = true;
   
   for (; total_size > 0; total_size--){
-    long power = (long)pow(10, total_size - 1);
+    long power = power_function(10, total_size - 1);
     long digit = number / power;
 
+    
     if (leading_zeros && digit != 0)
       leading_zeros = false;
-      
+
     if (leading_zeros)
       Serial.print(" ");
     else{
-      Serial.print(number / power);
+      Serial.print(digit);
     }
     
     number -= digit * power;
   }
 }
 
-void print_table_row(long with, long without, long delta, long count, double est_cost){
+long power_function(long number, long expo){
+  if (expo == 0)
+    return 1;
+
+  long res = number;
+  
+  for (; expo > 1; expo--){
+    res *= number; 
+  }
+
+  return res;
+}
+
+void print_table_row(long with, long without, long delta, long count, double est_cost, double est_cost_percent){
   Serial.print("| ");
   print_formatted_number(with, 10);
   Serial.print(" | ");
@@ -194,17 +211,75 @@ void print_table_row(long with, long without, long delta, long count, double est
   print_formatted_number(count, 10);
   Serial.print(" | ");
   Serial.print(est_cost, 8);
-  Serial.println(" |");
+  Serial.print(" | ");
+  Serial.print(est_cost_percent, 7);
+  Serial.println("% |");
 }
 
 
 void component_test_interupt_cost(){
-  const int test_count = 10;
-  const long iterations = 50000;
+  const int test_count = 50;
+  const long moter_wait = 1500;
+  const long iterations = 100000;
+
+  long time_start, time_end, interrupt_count_start, interrupt_count_end, 
+       no_interrupt_time, interrupt_time, interrupt_count, time_delta,
+       average_no_interrupt_time = 0, average_interrupt_time = 0, 
+       average_interrupt_count = 0;
   
+  Serial.println("| with       | without    | delta      | count      | est cost   | est cost % |");
+  for (int i = 0; i < test_count + 1; i++){
+    time_start = micros();
+    for (volatile long j = 0; j < iterations; j++);
+    time_end = micros();
+  
+    no_interrupt_time = time_end - time_start;
+
+
+    motor_turn(&motor1, COUNTERCLOCKWISE);
+    delay(moter_wait);
+    
+    interrupt_count_start = motor1.deg;
+    time_start = micros();
+    for (volatile long j = 0; j < iterations; j++);
+    time_end = micros();
+    interrupt_count_end = motor1.deg;
+
+    interrupt_time = time_end - time_start;
+    interrupt_count = interrupt_count_end - interrupt_count_start;
+    
+    motor_stop(&motor1);
+
+  if (i != 0){
+    time_delta = interrupt_time - no_interrupt_time;
+
+    print_table_row(interrupt_time, no_interrupt_time, time_delta, interrupt_count,
+                    time_delta / (double)interrupt_count, time_delta / (double)interrupt_time);
+
+    average_interrupt_time += interrupt_time;
+    average_no_interrupt_time += no_interrupt_time;
+    average_interrupt_count += interrupt_count;
+  }
+    
+    delay(moter_wait);
+  }
+
+  average_no_interrupt_time /= test_count;
+  average_interrupt_time /= test_count;
+  average_interrupt_count /= test_count; 
+  time_delta = average_interrupt_time - average_no_interrupt_time;
+  
+  Serial.println("-------------------------------------------------------------------------------");
+  print_table_row(average_interrupt_time, average_no_interrupt_time, time_delta, average_interrupt_count,
+                  time_delta / (double)average_interrupt_count, time_delta / (double)average_interrupt_time);
+
+
+  return;
+  /*
   long time_start, time_end, interrupt_count_start, interrupt_count_end;
   long no_interrupt_times[test_count], interrupt_times[test_count], interrupt_counts[test_count];
-
+  
+  delay(2500); //HACK: this makes it so micros() gives us currect result on first iteration for some reason...
   // run measurements without a motor running
   for (int i = 0; i < test_count; i++){  
     time_start = micros();
@@ -213,7 +288,6 @@ void component_test_interupt_cost(){
   
     no_interrupt_times[i] = time_end - time_start;
   }
-
   // run measurements with a motor running
   motor_turn(&motor1, COUNTERCLOCKWISE);
   delay(2500);
@@ -223,7 +297,7 @@ void component_test_interupt_cost(){
     for (volatile long j = 0; j < iterations; j++);
     time_end = micros();
     interrupt_count_end = motor1.deg;
-    
+
     interrupt_times[i] = time_end - time_start;
     interrupt_counts[i] = interrupt_count_end - interrupt_count_start;
   }
@@ -233,11 +307,11 @@ void component_test_interupt_cost(){
   long average_no_interrupt_time = 0, average_interrupt_time = 0, average_interrupt_count = 0, delta;
 
   // print result table
-  Serial.println("| with       | without    | delta      | count      | est cost   |");
+  Serial.println("| with       | without    | delta      | count      | est cost   | est cost % |");
   for (int i = 0; i < test_count; i++){
     delta = interrupt_times[i] - no_interrupt_times[i];
-    print_table_row(interrupt_times[i], no_interrupt_times[i], interrupt_counts[i], delta,
-                    delta / (double)interrupt_counts[i]);
+    print_table_row(interrupt_times[i], no_interrupt_times[i], delta, interrupt_counts[i],
+                    delta / (double)interrupt_counts[i], delta / (double)interrupt_times[i]);
 
     average_interrupt_time += interrupt_times[i];
     average_no_interrupt_time += no_interrupt_times[i];
@@ -249,8 +323,9 @@ void component_test_interupt_cost(){
   average_interrupt_count /= test_count; 
   delta = average_interrupt_time - average_no_interrupt_time;
   
-  Serial.println("------------------------------------------------------------------");
-  print_table_row(average_interrupt_time, average_no_interrupt_time, average_interrupt_count, delta,
-                  delta / (double)average_interrupt_count);
+  Serial.println("-------------------------------------------------------------------------------");
+  print_table_row(average_interrupt_time, average_no_interrupt_time, delta, average_interrupt_count,
+                  delta / (double)average_interrupt_count, delta / (double)average_interrupt_time);
+  */
 }
 #endif
