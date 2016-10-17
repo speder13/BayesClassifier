@@ -1,6 +1,6 @@
-//#define COMPONENT_TEST_MOTOR_COAST
+#define COMPONENT_TEST_MOTOR_COAST
 //#define COMPONENT_TEST_MOTOR_TIME
-#define COMPONENT_TEST_INTERRUPT_COST
+//#define COMPONENT_TEST_INTERRUPT_COST
 //#define API_TEST_MOTOR_TURN_DEG
 //#define KILLALL // Uncomment this to kill the system, and stop all components
 
@@ -20,6 +20,7 @@ enum Turning_Direction {
 struct Motor {
   int pin = 0;
   volatile long deg = 0;
+  byte lock = 0;
   Turning_Direction dir = COUNTERCLOCKWISE;
 };
 
@@ -28,9 +29,6 @@ struct Advanced_Motor {
 };
 
 Motor motor1, motor2, motor3;
-
-
-
 
 void setup() {
 #ifdef KILLALL
@@ -41,7 +39,7 @@ void setup() {
   motor2.pin = MOTOR_2_PIN;
   //motor3.pin = MOTOR_3_PIN;
 
-  Serial.begin(9600);
+  Serial.begin(9200);
 
   pinMode(MOTOR_1_INT_PIN, INPUT_PULLUP);
   //pinMode(MOTOR_2_INT_PIN, INPUT_PULLUP);
@@ -76,6 +74,9 @@ void setup() {
 #endif
 }
 
+void loop() {
+}
+
 void motor1_interrupt() {
   motor1.deg += motor1.dir;
 }
@@ -91,25 +92,60 @@ void motor3_interrupt() {
 void motor_turn_deg(Motor* motor, int deg, Turning_Direction dir)
 {
   int goal = motor->deg + (deg * dir);
+  bool error = false;
+  bool waiting = true;
 
   motor_turn(motor, dir);
 
   switch (motor->dir) {
     case CLOCKWISE:
-      while (goal <= motor->deg) {
-        delay(1);
-      }
+      do {
+        noInterrupts();
+        waiting = goal < motor->deg;
+        interrupts();
+      } while (waiting);
+
+      error = goal < motor->deg;
       break;
     case COUNTERCLOCKWISE:
-      while (goal >= motor->deg) {
-        delay(1);
-      }
+      do {
+        noInterrupts();
+        waiting = goal > motor->deg;
+        interrupts();
+      } while (waiting);
+      
+      error = goal > motor->deg;
       break;
     default:
-      Serial.println("NO ROTATION");
+      error = true;
       break;
   }
+  
   motor_stop(motor);
+
+  if (error) { 
+    Serial.println("ERROR: motor_turn_deg"); 
+    Serial.print("goal: "); Serial.println(goal);
+    Serial.print("motor->deg: "); Serial.println(motor->deg);
+    Serial.print("dir: "); 
+    
+    switch (motor->dir) {
+      case CLOCKWISE:
+        Serial.println("CLOCKWISE");
+        Serial.print("goal < motor->deg = "); Serial.println(error ? "true" : "false");
+        break;
+      case COUNTERCLOCKWISE:
+        Serial.println("COUNTERCLOCKWISE");
+        Serial.print("goal > motor->deg = "); Serial.println(error ? "true" : "false");
+        break;
+      default:
+        Serial.println("NOT SUPPORTED DIR");
+        break;
+    }
+    
+    delay(1000);
+    exit(0);        
+  }
 }
 
 void motor_stop(Motor* motor)
@@ -123,10 +159,6 @@ void motor_turn(Motor* motor, Turning_Direction dir)
   digitalWrite(motor->pin, HIGH);
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-}
-
 /*******************************
    COMPONENT TESTING FUNCTIONS
  *******************************/
@@ -135,10 +167,6 @@ void component_test_motor_coast(Motor* motor) {
   for (int i = 0; i < 20; i++) {
     motor->deg = 0;
     motor_turn_deg(motor, 360, COUNTERCLOCKWISE);
-    if (motor->deg < 360) {     // In case it happens that the loop breaks out before 360 degrees
-      Serial.println("ERROR");  // thrown an error, because that is not supposed to happen.
-      exit(0);                  // The error should be fixed, but cant be sure yet.
-    }
 
     delay(1000);
     Serial.println(motor->deg); // Value used for component testing.
