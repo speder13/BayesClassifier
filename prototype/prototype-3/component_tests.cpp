@@ -3,12 +3,12 @@
 #ifdef COMPONENT_TEST_MOTOR_COAST
 void component_test_motor_coast(Motor* motor) {
   for (int i = 0; i < 20; i++) {
-    motor->deg = 0;
-    motor_turn_deg(motor, 360, COUNTERCLOCKWISE);
+    motor->base.deg = 0;
+    motor_turn_deg(motor, 360);
 
     delay(1000);
-    Serial.println(motor->deg); // Value used for component testing.
-    delay(500);                 // Should be 360 + coast degrees for the motor.
+    Serial.println(motor_get_degrees(motor)); // Value used for component testing.
+    delay(500);                               // Should be 360 + coast degrees for the motor.
   }
 }
 #endif
@@ -18,12 +18,8 @@ void component_test_motor_time(Motor* motor) {
   for (int i = 0; i < 20; i++) {
     motor->deg = 0;
     unsigned long t_start = millis();
-    motor_turn_deg(motor, 360, COUNTERCLOCKWISE);
+    motor_turn_deg(motor, 360);
     unsigned long t_end = millis();
-    if (motor->deg < 360) {
-      Serial.println("ERROR");
-      exit(0);
-    }
 
     Serial.println(t_end-t_start);
     delay(1000);
@@ -102,14 +98,14 @@ void component_test_interupt_cost(){
     no_interrupt_time = time_end - time_start;
 
 
-    motor_turn(&motor1, COUNTERCLOCKWISE);
+    motor_turn(&motor1);
     delay(moter_wait);
     
-    interrupt_count_start = motor1.deg;
+    interrupt_count_start = motor_get_degrees(&motor1);
     time_start = micros();
     for (volatile long j = 0; j < iterations; j++);
     time_end = micros();
-    interrupt_count_end = motor1.deg;
+    interrupt_count_end = motor_get_degrees(&motor1);;
 
     interrupt_time = time_end - time_start;
     interrupt_count = interrupt_count_end - interrupt_count_start;

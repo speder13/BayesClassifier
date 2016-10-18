@@ -1,62 +1,110 @@
 #include "motor_api.h"
 
-void motor_turn_deg(Motor* motor, int deg, Turning_Direction dir)
+// non public functions
+long base_motor_get_degrees(Base_Motor *motor) 
 {
-  int goal = motor->deg + (deg * dir);
-  bool error = false;
-  bool waiting = true;
+  long res;
+  
+  noInterrupts();
+  res = motor->deg;
+  interrupts();
 
-  motor_turn(motor, dir);
+  return res;
+}
 
-  switch (motor->dir) {
-    case CLOCKWISE:
-      do {
-        noInterrupts();
-        waiting = goal < motor->deg;
-        interrupts();
-      } while (waiting);
-
-      error = goal < motor->deg;
+void advanced_motor_turn_without_turning(Advanced_Motor *motor, Turning_Direction dir) 
+{
+  motor->dir = dir;
+  
+  switch(dir)
+  {
+    case FORWARD:
+      digitalWrite(motor->pin1, HIGH);
+      digitalWrite(motor->pin2, LOW);
       break;
-    case COUNTERCLOCKWISE:
-      do {
-        noInterrupts();
-        waiting = goal > motor->deg;
-        interrupts();
-      } while (waiting);
-      
-      error = goal > motor->deg;
+    case BACKWARDS:
+      digitalWrite(motor->pin1, LOW);
+      digitalWrite(motor->pin2, HIGH);
       break;
     default:
-      error = true;
+      Serial.println("Not supported direction!");
+      delay(1000);
+      exit(0);
       break;
   }
-  
-  motor_stop(motor);
+}
 
-  if (error) { 
-    Serial.println("ERROR: motor_turn_deg"); 
-    Serial.print("goal: "); Serial.println(goal);
-    Serial.print("motor->deg: "); Serial.println(motor->deg);
-    Serial.print("dir: "); 
-    
+// public functions
+void motor_init(Motor *motor, byte pin, byte interrupt_pin, void (*interrupt_handler)(void)) 
+{
+  motor->pin = pin;
+  
+  pinMode(interrupt_pin, INPUT_PULLUP);
+  pinMode(pin, OUTPUT);
+  attachInterrupt(digitalPinToInterrupt(interrupt_pin), interrupt_handler, CHANGE);
+}
+
+void advanced_motor_init(Advanced_Motor *motor, byte pin1, byte pin2, byte interrupt_pin, void (*interrupt_handler)(void))
+{
+  motor->pin1 = pin1;
+  motor->pin2 = pin2;
+  
+  pinMode(interrupt_pin, INPUT_PULLUP);
+  pinMode(pin1, OUTPUT);
+  pinMode(pin2, OUTPUT);
+  attachInterrupt(digitalPinToInterrupt(interrupt_pin), interrupt_handler, CHANGE);
+}
+
+void advanced_motor_turn_deg(Advanced_Motor* motor, int deg, Turning_Direction dir)
+{
+  int goal = advanced_motor_get_degrees(motor) + (deg * dir);
+  Turning_Direction next_dir;
+
+  advanced_motor_turn(motor, dir);
+
+  do {
     switch (motor->dir) {
-      case CLOCKWISE:
-        Serial.println("CLOCKWISE");
-        Serial.print("goal < motor->deg = "); Serial.println(error ? "true" : "false");
+      case FORWARD:
+        while (goal < advanced_motor_get_degrees(motor));
+        next_dir = BACKWARDS;
         break;
-      case COUNTERCLOCKWISE:
-        Serial.println("COUNTERCLOCKWISE");
-        Serial.print("goal > motor->deg = "); Serial.println(error ? "true" : "false");
-        break;
-      default:
-        Serial.println("NOT SUPPORTED DIR");
+      case BACKWARDS:
+        while (goal > advanced_motor_get_degrees(motor));
+        next_dir = FORWARD;
         break;
     }
     
-    delay(1000);
-    exit(0);        
-  }
+    advanced_motor_stop(motor);
+    dir = next_dir;
+  } while (goal != advanced_motor_get_degrees(motor));
+  
+
+  
+}
+
+void motor_turn_deg(Motor* motor, int deg)
+{
+  int goal = motor_get_degrees(motor) + (deg);
+  bool error = false;
+
+  motor_turn(motor);
+  while (goal > motor_get_degrees(motor));
+  motor_stop(motor);
+}
+
+void advanced_motor_stop(Advanced_Motor* motor)
+{
+  digitalWrite(motor->pin1, LOW);
+  digitalWrite(motor->pin2, LOW);
+  
+  volatile long current_deg, prev_deg;
+
+  do {
+  
+    prev_deg = advanced_motor_get_degrees(motor);
+    delay(50);
+    current_deg = advanced_motor_get_degrees(motor);
+  } while(current_deg != prev_deg);
 }
 
 void motor_stop(Motor* motor)
@@ -64,8 +112,26 @@ void motor_stop(Motor* motor)
   digitalWrite(motor->pin, LOW);
 }
 
-void motor_turn(Motor* motor, Turning_Direction dir)
+void advanced_motor_turn(Advanced_Motor *motor, Turning_Direction dir) 
 {
-  motor->dir = dir;
+  advanced_motor_turn_without_turning(motor, dir);
+}
+
+void motor_turn(Motor* motor)
+{
   digitalWrite(motor->pin, HIGH);
 }
+
+long motor_get_degrees(Motor *motor) 
+{
+  return base_motor_get_degrees(&motor->base);
+}
+
+long advanced_motor_get_degrees(Advanced_Motor *motor) 
+{
+  return base_motor_get_degrees(&motor->base);
+}
+
+
+
+
