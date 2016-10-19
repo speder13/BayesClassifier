@@ -21,11 +21,15 @@ struct Advanced_Motor {
   Base_Motor base;
   byte pin1;
   byte pin2;
+  byte interrupt_pin1;
+  byte interrupt_pin2;
   Turning_Direction dir;
 };
 
 void motor_init(Motor *motor, byte pin, byte interrupt_pin, void (*interrupt_handler)(void));
-void advanced_motor_init(Advanced_Motor *motor, byte pin1, byte pin2, byte interrupt_pin, void (*interrupt_handler)(void));
+void advanced_motor_init(Advanced_Motor *motor, byte pin1, byte pin2, 
+                         byte interrupt_pin1, byte interrupt_pin2, 
+                         void (*interrupt_handler1)(void));
 
 void advanced_motor_turn_deg(Advanced_Motor* motor, int deg, Turning_Direction dir);
 void motor_turn_deg(Motor* motor, int deg);

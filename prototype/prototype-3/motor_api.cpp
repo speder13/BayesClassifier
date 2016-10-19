@@ -1,6 +1,8 @@
 #include "motor_api.h"
 
-// non public functions
+/************************
+ * non public functions *
+ ************************/
 long base_motor_get_degrees(Base_Motor *motor) 
 {
   long res;
@@ -34,7 +36,9 @@ void advanced_motor_turn_without_turning(Advanced_Motor *motor, Turning_Directio
   }
 }
 
-// public functions
+/********************
+ * public functions *
+ ********************/
 void motor_init(Motor *motor, byte pin, byte interrupt_pin, void (*interrupt_handler)(void)) 
 {
   motor->pin = pin;
@@ -44,25 +48,31 @@ void motor_init(Motor *motor, byte pin, byte interrupt_pin, void (*interrupt_han
   attachInterrupt(digitalPinToInterrupt(interrupt_pin), interrupt_handler, CHANGE);
 }
 
-void advanced_motor_init(Advanced_Motor *motor, byte pin1, byte pin2, byte interrupt_pin, void (*interrupt_handler)(void))
+void advanced_motor_init(Advanced_Motor *motor, byte pin1, byte pin2, 
+                         byte interrupt_pin1, byte interrupt_pin2, 
+                         void (*interrupt_handler1)(void))
 {
   motor->pin1 = pin1;
   motor->pin2 = pin2;
+  motor->interrupt_pin1 = interrupt_pin1;
+  motor->interrupt_pin2 = interrupt_pin2;
   
-  pinMode(interrupt_pin, INPUT_PULLUP);
+  pinMode(interrupt_pin1, INPUT_PULLUP);
+  pinMode(interrupt_pin2, INPUT_PULLUP);
   pinMode(pin1, OUTPUT);
   pinMode(pin2, OUTPUT);
-  attachInterrupt(digitalPinToInterrupt(interrupt_pin), interrupt_handler, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(interrupt_pin1), interrupt_handler1, CHANGE);
 }
 
 void advanced_motor_turn_deg(Advanced_Motor* motor, int deg, Turning_Direction dir)
 {
   int goal = advanced_motor_get_degrees(motor) + (deg * dir);
-  Turning_Direction next_dir;
+  Turning_Direction next_dir = FORWARD;
 
-  advanced_motor_turn(motor, dir);
 
   do {
+    advanced_motor_turn(motor, dir);
+
     switch (motor->dir) {
       case FORWARD:
         while (goal < advanced_motor_get_degrees(motor));
@@ -76,7 +86,10 @@ void advanced_motor_turn_deg(Advanced_Motor* motor, int deg, Turning_Direction d
     
     advanced_motor_stop(motor);
     dir = next_dir;
+
+    Serial.print(goal); Serial.print(" "); Serial.println(advanced_motor_get_degrees(motor));
   } while (goal != advanced_motor_get_degrees(motor));
+  Serial.println("Done");
   
 
   
@@ -85,7 +98,6 @@ void advanced_motor_turn_deg(Advanced_Motor* motor, int deg, Turning_Direction d
 void motor_turn_deg(Motor* motor, int deg)
 {
   int goal = motor_get_degrees(motor) + (deg);
-  bool error = false;
 
   motor_turn(motor);
   while (goal > motor_get_degrees(motor));
@@ -100,7 +112,6 @@ void advanced_motor_stop(Advanced_Motor* motor)
   volatile long current_deg, prev_deg;
 
   do {
-  
     prev_deg = advanced_motor_get_degrees(motor);
     delay(50);
     current_deg = advanced_motor_get_degrees(motor);
