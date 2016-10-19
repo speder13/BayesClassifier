@@ -14,28 +14,6 @@ long base_motor_get_degrees(Base_Motor *motor)
   return res;
 }
 
-void advanced_motor_turn_without_turning(Advanced_Motor *motor, Turning_Direction dir) 
-{
-  motor->dir = dir;
-  
-  switch(dir)
-  {
-    case FORWARD:
-      digitalWrite(motor->pin1, HIGH);
-      digitalWrite(motor->pin2, LOW);
-      break;
-    case BACKWARDS:
-      digitalWrite(motor->pin1, LOW);
-      digitalWrite(motor->pin2, HIGH);
-      break;
-    default:
-      Serial.println("Not supported direction!");
-      delay(1000);
-      exit(0);
-      break;
-  }
-}
-
 /********************
  * public functions *
  ********************/
@@ -66,33 +44,20 @@ void advanced_motor_init(Advanced_Motor *motor, byte pin1, byte pin2,
 
 void advanced_motor_turn_deg(Advanced_Motor* motor, int deg, Turning_Direction dir)
 {
-  int goal = advanced_motor_get_degrees(motor) + (deg * dir);
-  Turning_Direction next_dir = FORWARD;
+  long goal = advanced_motor_get_degrees(motor) + (deg * dir);
 
+  advanced_motor_turn(motor, dir);
 
-  do {
-    advanced_motor_turn(motor, dir);
-
-    switch (motor->dir) {
-      case FORWARD:
-        while (goal < advanced_motor_get_degrees(motor));
-        next_dir = BACKWARDS;
-        break;
-      case BACKWARDS:
-        while (goal > advanced_motor_get_degrees(motor));
-        next_dir = FORWARD;
-        break;
-    }
-    
-    advanced_motor_stop(motor);
-    dir = next_dir;
-
-    Serial.print(goal); Serial.print(" "); Serial.println(advanced_motor_get_degrees(motor));
-  } while (goal != advanced_motor_get_degrees(motor));
-  Serial.println("Done");
+  switch (dir) {
+    case FORWARD:
+      while (goal < advanced_motor_get_degrees(motor));
+      break;
+    case BACKWARD:
+      while (goal > advanced_motor_get_degrees(motor));
+      break;
+  }
   
-
-  
+  advanced_motor_stop(motor);
 }
 
 void motor_turn_deg(Motor* motor, int deg)
@@ -106,16 +71,53 @@ void motor_turn_deg(Motor* motor, int deg)
 
 void advanced_motor_stop(Advanced_Motor* motor)
 {
+  //long stop_deg = advanced_motor_get_degrees(motor);
+
+  switch(motor->dir)
+  {
+    case FORWARD:
+      advanced_motor_turn(motor, BACKWARD);
+      while (motor->dir != BACKWARD);
+      break;  
+    case BACKWARD:
+      advanced_motor_turn(motor, FORWARD);
+      while (motor->dir != FORWARD);
+      break;
+  }
   digitalWrite(motor->pin1, LOW);
   digitalWrite(motor->pin2, LOW);
   
-  volatile long current_deg, prev_deg;
+  /*
+  enum Turning_Direction {
+  FORWARD    = -1,
+  BACKWARD  = 1
+};
 
+  */
+  /*
   do {
-    prev_deg = advanced_motor_get_degrees(motor);
-    delay(50);
-    current_deg = advanced_motor_get_degrees(motor);
-  } while(current_deg != prev_deg);
+    deg_traveled = stop_deg - advanced_motor_get_degrees(motor);
+    Serial.println(analog);
+
+    if (deg_traveled > 0) {
+
+      advanced_motor_turn(motor, BACKWARD);
+      while(stop_deg > advanced_motor_get_degrees(motor));
+
+    } else if (deg_traveled < 0) {
+      
+      advanced_motor_turn(motor, FORWARD);
+      while(stop_deg < advanced_motor_get_degrees(motor));
+    }
+
+    digitalWrite(motor->pin1, LOW);
+    digitalWrite(motor->pin2, LOW);
+    delay(200);
+  } while (stop_deg != advanced_motor_get_degrees(motor));
+
+  digitalWrite(motor->pin1, LOW);
+  digitalWrite(motor->pin2, LOW);
+  */
 }
 
 void motor_stop(Motor* motor)
@@ -125,7 +127,26 @@ void motor_stop(Motor* motor)
 
 void advanced_motor_turn(Advanced_Motor *motor, Turning_Direction dir) 
 {
-  advanced_motor_turn_without_turning(motor, dir);
+  advanced_motor_turn_analog(motor, dir, 255);
+}
+
+void advanced_motor_turn_analog(Advanced_Motor *motor, Turning_Direction dir, byte value) {
+  switch(dir)
+  {
+    case FORWARD:
+      analogWrite(motor->pin1, value);
+      digitalWrite(motor->pin2, LOW);
+      break;
+    case BACKWARD:
+      digitalWrite(motor->pin1, LOW);
+      analogWrite(motor->pin2, value);
+      break;
+    default:
+      Serial.println("Not supported direction!");
+      delay(1000);
+      exit(0);
+      break;
+  }
 }
 
 void motor_turn(Motor* motor)

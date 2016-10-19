@@ -3,10 +3,9 @@
 
 #include "Arduino.h"
 
-enum Turning_Direction {
-  FORWARD    = -1,
-  BACKWARDS  = 1
-};
+typedef signed char Turning_Direction;
+#define FORWARD -1
+#define BACKWARD 1
 
 struct Base_Motor {
   volatile long deg = 0;
@@ -23,7 +22,7 @@ struct Advanced_Motor {
   byte pin2;
   byte interrupt_pin1;
   byte interrupt_pin2;
-  Turning_Direction dir;
+  volatile Turning_Direction dir;
 };
 
 void motor_init(Motor *motor, byte pin, byte interrupt_pin, void (*interrupt_handler)(void));
@@ -37,6 +36,7 @@ void motor_turn_deg(Motor* motor, int deg);
 void advanced_motor_stop(Advanced_Motor* motor);
 void motor_stop(Motor* motor);
 
+void advanced_motor_turn_analog(Advanced_Motor *motor, Turning_Direction dir, byte value);
 void advanced_motor_turn(Advanced_Motor *motor, Turning_Direction dir);
 void motor_turn(Motor* motor);
 

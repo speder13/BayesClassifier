@@ -11,7 +11,7 @@
 #define MOTOR_1_INT_PIN 2
 #define MOTOR_2_INT_PIN 2
 #define MOTOR_3_INT_PIN1 2
-#define MOTOR_3_INT_PIN2 3
+#define MOTOR_3_INT_PIN2 6
 
 
 Motor motor1, motor2;
@@ -32,11 +32,20 @@ void setup() {
   motor_init(&motor1, MOTOR_1_PIN, MOTOR_1_INT_PIN, motor1_interrupt);
   motor_init(&motor2, MOTOR_2_PIN, MOTOR_2_INT_PIN, motor2_interrupt);
   */
+
+  pinMode(3, INPUT_PULLUP);
+  pinMode(4, OUTPUT);
+  attachInterrupt(digitalPinToInterrupt(3), instant_stop_interrupt, CHANGE);
+  analogWrite(4, 50);
+
   advanced_motor_init(&motor3, MOTOR_3_PIN1, MOTOR_3_PIN2, 
                       MOTOR_3_INT_PIN1, MOTOR_3_INT_PIN2, 
                       motor3_interrupt1);
 
-  //advanced_motor_turn_deg(&motor3, 360, BACKWARDS);
+  advanced_motor_turn_deg(&motor3, 360, BACKWARD);
+  delay(2000);
+  Serial.println(motor3.base.deg);
+  //advanced_motor_turn(&motor3, BACKWARDS);
   
 #ifdef COMPONENT_TEST_MOTOR_COAST
   Serial.println("Component Test: Motor Coast");
@@ -60,7 +69,10 @@ void setup() {
 }
 
 void loop() {
-  Serial.println(motor3.base.deg);
+}
+
+void instant_stop_interrupt() {
+  //exit(0);
 }
 
 void motor1_interrupt() {
@@ -79,10 +91,10 @@ void motor3_interrupt1()
   switch (pin1_res) 
   {
     case LOW:
-      motor3.dir = pin2_res == LOW ? FORWARD : BACKWARDS;
+      motor3.dir = pin2_res == LOW ? FORWARD : BACKWARD;
       break;
     default:
-      motor3.dir = pin2_res == LOW ? BACKWARDS : FORWARD;
+      motor3.dir = pin2_res == LOW ? BACKWARD : FORWARD;
       break;
 
   }
