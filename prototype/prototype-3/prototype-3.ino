@@ -1,4 +1,5 @@
 #include "motor_api.h"
+#include "component_tests.h"
 
 //#define API_TEST_MOTOR_TURN_DEG
 //#define KILLALL // Uncomment this to kill the system, and stop all components
@@ -36,7 +37,7 @@ void setup() {
   motor_init(&motor1, MOTOR_1_PIN, MOTOR_1_INT_PIN, motor1_interrupt);
   motor_init(&motor2, MOTOR_2_PIN, MOTOR_2_INT_PIN, motor2_interrupt);
   */
-
+/*
   pinMode(3, INPUT_PULLUP);
   pinMode(4, OUTPUT);
   attachInterrupt(digitalPinToInterrupt(3), instant_stop_interrupt, CHANGE);
@@ -53,6 +54,12 @@ void setup() {
   //Serial.println(motor3.base.deg);
   //advanced_motor_turn(&motor3, BACKWARDS);
   
+  */
+
+  advanced_motor_init(&motor3, MOTOR_3_PIN1, MOTOR_3_PIN2, 
+                      MOTOR_3_INT_PIN1, MOTOR_3_INT_PIN2, 
+                      motor3_interrupt1);
+                      
 #ifdef COMPONENT_TEST_MOTOR_COAST
   Serial.println("Component Test: Motor Coast");
   component_test_motor_coast(&motor1);
@@ -65,7 +72,7 @@ void setup() {
 
 #ifdef COMPONENT_TEST_INTERRUPT_COST
   Serial.println("Component Test: Interupt Cost");
-  component_test_interupt_cost();
+  component_test_interupt_cost(&motor3);
 #endif
 
 #ifdef API_TEST_MOTOR_TURN_DEG
