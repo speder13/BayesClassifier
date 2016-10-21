@@ -28,6 +28,19 @@ void component_test_motor_time(Motor* motor) {
 #endif
 
 #ifdef COMPONENT_TEST_INTERRUPT_COST
+long power_function(long number, long expo){
+  if (expo == 0)
+    return 1;
+
+  long res = number;
+  
+  for (; expo > 1; expo--){
+    res *= number; 
+  }
+
+  return res;
+}
+
 void print_formatted_number(long number, int total_size){
   bool leading_zeros = true;
   
@@ -49,19 +62,6 @@ void print_formatted_number(long number, int total_size){
   }
 }
 
-long power_function(long number, long expo){
-  if (expo == 0)
-    return 1;
-
-  long res = number;
-  
-  for (; expo > 1; expo--){
-    res *= number; 
-  }
-
-  return res;
-}
-
 void print_table_row(long with, long without, long delta, long count, double est_cost, double est_cost_percent){
   Serial.print("| ");
   print_formatted_number(with, 10);
@@ -72,15 +72,15 @@ void print_table_row(long with, long without, long delta, long count, double est
   Serial.print(" | ");
   print_formatted_number(count, 10);
   Serial.print(" | ");
-  Serial.print(est_cost, 8);
+  Serial.print(est_cost, 7);
   Serial.print(" | ");
   Serial.print(est_cost_percent, 7);
   Serial.println("% |");
 }
 
 
-void component_test_interupt_cost(){
-  const int test_count = 50;
+void component_test_interupt_cost(Advanced_Motor* motor){
+  const int test_count = 20;
   const long moter_wait = 1500;
   const long iterations = 100000;
 
@@ -98,19 +98,19 @@ void component_test_interupt_cost(){
     no_interrupt_time = time_end - time_start;
 
 
-    motor_turn(&motor1);
+    advanced_motor_turn(motor, BACKWARD);
     delay(moter_wait);
     
-    interrupt_count_start = motor_get_degrees(&motor1);
+    interrupt_count_start = advanced_motor_get_degrees(motor);
     time_start = micros();
     for (volatile long j = 0; j < iterations; j++);
     time_end = micros();
-    interrupt_count_end = motor_get_degrees(&motor1);;
+    interrupt_count_end = advanced_motor_get_degrees(motor);;
 
     interrupt_time = time_end - time_start;
     interrupt_count = interrupt_count_end - interrupt_count_start;
     
-    motor_stop(&motor1);
+    advanced_motor_stop(motor);
 
   if (i != 0){
     time_delta = interrupt_time - no_interrupt_time;
