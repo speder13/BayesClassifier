@@ -3,15 +3,19 @@
 //#define API_TEST_MOTOR_TURN_DEG
 //#define KILLALL // Uncomment this to kill the system, and stop all components
 
-#define MOTOR_1_PIN 4
-#define MOTOR_2_PIN 11
-#define MOTOR_3_PIN1 7
-#define MOTOR_3_PIN2 8
+// Motor 1: Control conveyor belt
+// Motor 2: Control feeder
+// Motor 3: Control separator
 
-#define MOTOR_1_INT_PIN 2
-#define MOTOR_2_INT_PIN 2
-#define MOTOR_3_INT_PIN1 2
-#define MOTOR_3_INT_PIN2 6
+#define MOTOR_1_PIN 6
+#define MOTOR_2_PIN 5
+#define MOTOR_3_PIN1 22      // Control motor direction
+#define MOTOR_3_PIN2 24      // Control motor direction
+
+#define MOTOR_1_INT_PIN 18
+#define MOTOR_2_INT_PIN 3
+#define MOTOR_3_INT_PIN1 2  // Interrupt
+#define MOTOR_3_INT_PIN2 31  // Used to read direction
 
 
 Motor motor1, motor2;
@@ -38,13 +42,15 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(3), instant_stop_interrupt, CHANGE);
   analogWrite(4, 50);
 
+  motor_init(&motor1, MOTOR_1_PIN, MOTOR_1_INT_PIN, motor1_interrupt);
+  motor_init(&motor2, MOTOR_2_PIN, MOTOR_2_INT_PIN, motor2_interrupt);
   advanced_motor_init(&motor3, MOTOR_3_PIN1, MOTOR_3_PIN2, 
                       MOTOR_3_INT_PIN1, MOTOR_3_INT_PIN2, 
                       motor3_interrupt1);
 
-  advanced_motor_turn_deg(&motor3, 360, BACKWARD);
-  delay(2000);
-  Serial.println(motor3.base.deg);
+  //advanced_motor_turn_deg(&motor3, 360, BACKWARD);
+  //delay(2000);
+  //Serial.println(motor3.base.deg);
   //advanced_motor_turn(&motor3, BACKWARDS);
   
 #ifdef COMPONENT_TEST_MOTOR_COAST

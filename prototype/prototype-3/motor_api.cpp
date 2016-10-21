@@ -72,7 +72,7 @@ void motor_turn_deg(Motor* motor, int deg)
 void advanced_motor_stop(Advanced_Motor* motor)
 {
   //long stop_deg = advanced_motor_get_degrees(motor);
-
+/*
   switch(motor->dir)
   {
     case FORWARD:
@@ -84,9 +84,35 @@ void advanced_motor_stop(Advanced_Motor* motor)
       while (motor->dir != FORWARD);
       break;
   }
+  */
+
+  if (motor->dir == FORWARD) 
+  {
+      advanced_motor_turn(motor, BACKWARD);
+  } else {
+      advanced_motor_turn(motor, FORWARD);
+  }
+  delay(50);
   digitalWrite(motor->pin1, LOW);
   digitalWrite(motor->pin2, LOW);
-  
+
+/*
+  switch(motor->dir)
+  {
+    case FORWARD:
+      advanced_motor_turn_analog(motor, BACKWARD, 32);
+      break;
+    case BACKWARD:
+      advanced_motor_turn_analog(motor, FORWARD, 32);
+      break;
+    default:
+      Serial.println("Error");
+      exit(0);
+  }
+
+  digitalWrite(motor->pin1, LOW);
+  digitalWrite(motor->pin2, LOW);
+  */
   /*
   enum Turning_Direction {
   FORWARD    = -1,
