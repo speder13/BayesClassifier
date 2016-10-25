@@ -1,3 +1,4 @@
+#ifndef PROGRAM
 #include "component_tests.h"
 
 #ifdef COMPONENT_TEST_MOTOR_COAST
@@ -191,3 +192,8 @@ void component_test_interupt_cost(Advanced_Motor* motor){
   */
 }
 #endif
+
+#ifdef COMPONENT_TEST_MOTOR_DEGREE
+
+#endif
+#endif //PROGRAM - this should be last line in file

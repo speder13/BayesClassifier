@@ -6,7 +6,9 @@
 
 //#define COMPONENT_TEST_MOTOR_COAST
 //#define COMPONENT_TEST_MOTOR_TIME
-#define COMPONENT_TEST_INTERRUPT_COST
+//#define COMPONENT_TEST_INTERRUPT_COST
+//#define COMPONENT_TEST_MOTOR_DEGREE
+//#define API_TEST_MOTOR_TURN_DEG
 
 #ifdef COMPONENT_TEST_MOTOR_COAST
 void component_test_motor_coast(Motor* motor);
@@ -20,4 +22,17 @@ void component_test_motor_time(Motor* motor);
 void component_test_interupt_cost(Advanced_Motor* motor);
 #endif
 
+#ifdef COMPONENT_TEST_MOTOR_DEGREE
+//TODO: TEST
 #endif
+
+#ifdef API_TEST_MOTOR_TURN_DEG
+//TODO: TEST
+#endif
+
+#if defined(COMPONENT_TEST_MOTOR_COAST) || defined(COMPONENT_TEST_MOTOR_TIME) || defined(COMPONENT_TEST_INTERRUPT_COST) || defined(COMPONENT_TEST_MOTOR_DEGREE) || defined(API_TEST_MOTOR_TURN_DEG)
+#else
+#define PROGRAM
+#endif
+
+#endif  // COMPONENT_TESTS_H
