@@ -38,9 +38,23 @@ void setup() {
                       adv_motor_separator_interrupt1);
 
 #ifdef PROGRAM
-  // Start feeder and conveyor belt                
-  motor_turn(&motor_conveyor);
+/*
+int feeder_destinations[4] {
+  0, 90, 180, 270
+};
+
+  for (int i = 0; i < 10; i++ ){
+    motor_turn_to_deg(&motor_feeder, feeder_destinations[i % 4]);
+    Serial.println(i);
+    delay(1000);
+  }
+
+  exit(0);
+  motor_turn_analog(&motor_conveyor, 255);
+  delay(2000);
+  motor_turn_analog(&motor_conveyor, 185);
   motor_turn(&motor_feeder);
+  */
 #endif
 
   /*********************
@@ -74,9 +88,27 @@ void setup() {
 //#endif
 }
 
+int separator_destinations[4] {
+  290, 325, 35, 70
+};
+
+int feeder_destinations[4] {
+  0, 90, 180, 270
+};
+
+byte next_feeder_destination = 0;
+long next_iteration = 90;
 void loop() {
 #ifdef PROGRAM
-  Serial.println("No component test to tie me down!");
+  Serial.println(advanced_motor_get_degrees(&adv_motor_separator));
+/*
+  advanced_motor_turn_to_deg(&adv_motor_separator, separator_destinations[millis() % 4]);
+  motor_turn_to_deg(&motor_feeder, feeder_destinations[next_feeder_destination % 4]);
+  next_feeder_destination++;
+
+  while (motor_get_degrees(&motor_conveyor) < next_iteration) ;
+  next_iteration += 90;
+  */
 #else
   Serial.println("Plz help!");
 #endif
@@ -87,29 +119,16 @@ void instant_stop_interrupt() {
 }
 
 void motor_conveyor_interrupt() {
-  motor_conveyor.base.deg++;
+  motor_update_degrees(&motor_conveyor);
 }
 
 void motor_feeder_interrupt() {
-  motor_feeder.base.deg++;
+  motor_update_degrees(&motor_feeder);
 }
 
 void adv_motor_separator_interrupt1() 
 {
-  byte pin1_res = digitalRead(adv_motor_separator.interrupt_pin1);
-  byte pin2_res = digitalRead(adv_motor_separator.interrupt_pin2);
-
-  switch (pin1_res) 
-  {
-    case LOW:
-      adv_motor_separator.dir = pin2_res == LOW ? FORWARD : BACKWARD;
-      break;
-    default:
-      adv_motor_separator.dir = pin2_res == LOW ? BACKWARD : FORWARD;
-      break;
-  }
-
-  adv_motor_separator.base.deg += adv_motor_separator.dir;
+  advanced_motor_update_degrees(&adv_motor_separator);
 }
 
 
