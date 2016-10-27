@@ -12,22 +12,23 @@ long base_motor_get_degrees(Base_Motor* motor)
   res = motor->deg; 
   motor->reading = false;
 
-  return res;
+  return res * motor->degree_ratio;
 }
 
 /********************
  * public functions *
  ********************/
-void motor_init(Motor* motor, byte pin, byte interrupt_pin, void (*interrupt_handler)(void)) 
+void motor_init(Motor* motor, float degree_ratio, byte pin, byte interrupt_pin, void (*interrupt_handler)(void)) 
 {
   motor->pin = pin;
-  
+  motor->base.degree_ratio = degree_ratio;
+
   pinMode(interrupt_pin, INPUT_PULLUP);
   pinMode(pin, OUTPUT);
   attachInterrupt(digitalPinToInterrupt(interrupt_pin), interrupt_handler, CHANGE);
 }
 
-void advanced_motor_init(Advanced_Motor* motor, byte pin1, byte pin2, 
+void advanced_motor_init(Advanced_Motor* motor, float degree_ratio, byte pin1, byte pin2, 
                          byte interrupt_pin1, byte interrupt_pin2, 
                          void (*interrupt_handler1)(void))
 {
@@ -35,7 +36,8 @@ void advanced_motor_init(Advanced_Motor* motor, byte pin1, byte pin2,
   motor->pin2 = pin2;
   motor->interrupt_pin1 = interrupt_pin1;
   motor->interrupt_pin2 = interrupt_pin2;
-  
+  motor->base.degree_ratio = degree_ratio;
+
   pinMode(interrupt_pin1, INPUT_PULLUP);
   pinMode(interrupt_pin2, INPUT_PULLUP);
   pinMode(pin1, OUTPUT);
@@ -73,8 +75,10 @@ void advanced_motor_turn_to_deg(Advanced_Motor* motor, int deg) {
   
   // choose which direction to turn based on which distance is shortest
   if (distance_forward < distance_backward) {
+    Serial.println(distance_forward);
     advanced_motor_turn_deg(motor, distance_forward, FORWARD);
   } else {
+    Serial.println(distance_backward);
     advanced_motor_turn_deg(motor, distance_backward, BACKWARD);
   }
 }
@@ -107,13 +111,15 @@ void advanced_motor_turn_deg(Advanced_Motor* motor, int deg, Turning_Direction d
 
   advanced_motor_turn(motor, dir);
 
+Serial.println(goal);
+
   // wait for the motor to reach the goal
   switch (dir) {
     case FORWARD:
-      while (goal < advanced_motor_get_degrees(motor));
+      while (goal < advanced_motor_get_degrees(motor)){Serial.println(advanced_motor_get_degrees(motor));};
       break;
     case BACKWARD:
-      while (goal > advanced_motor_get_degrees(motor));
+      while (goal > advanced_motor_get_degrees(motor)){Serial.println(advanced_motor_get_degrees(motor));};
       break;
   }
   

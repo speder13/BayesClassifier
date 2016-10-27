@@ -23,6 +23,7 @@ typedef signed char Turning_Direction;
  */
 struct Base_Motor {
   volatile long deg = 0;
+  volatile float degree_ratio = 1;
   volatile long buffer = 0;
   volatile bool reading = false;
 };
@@ -51,12 +52,12 @@ struct Advanced_Motor {
 /*
  * initializes a standard motor
  */
-void motor_init(Motor *motor, byte pin, byte interrupt_pin, void (*interrupt_handler)(void));
+void motor_init(Motor *motor, float degree_ratio, byte pin, byte interrupt_pin, void (*interrupt_handler)(void));
 
 /*
  * initializes an advanced motor
  */
-void advanced_motor_init(Advanced_Motor *motor, byte pin1, byte pin2, 
+void advanced_motor_init(Advanced_Motor *motor, float degree_ratio, byte pin1, byte pin2, 
                          byte interrupt_pin1, byte interrupt_pin2, 
                          void (*interrupt_handler1)(void));
 
