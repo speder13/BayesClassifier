@@ -2,25 +2,14 @@
 
 #include "motor_api.h"
 #include "distance_sensor_api.h"
-#include "component_tests.h"
 
 enum Ball_Color {GREEN, YELLOW, RED, BLUE, EMPTY};
 int bucket_pos [5] = {0, 50, 100, 260, 310};
-Ball_Color segments [6] = {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY};
 
-int segments_start = 0;
-int segments_end = QUEUE_SIZE - 1;
+long default_dist = 0;
 
 Motor motor_conveyor, motor_feeder;
 Advanced_Motor adv_motor_separator;
-
-void button_init(int pin, void(*func)(void))
-{
-  pinMode(pin, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(pin), func, HIGH);
-}
-
-long default_dist = 0;
 
 void setup() {
   //exit(0);
@@ -33,59 +22,69 @@ void setup() {
   button_init(BUTTON_INT_PIN, instant_stop_interrupt);
 
   motor_init(&motor_conveyor, 0.36, MOTOR_CONVEYOR_PIN, MOTOR_CONVEYOR_INT_PIN, 
-              motor_conveyor_interrupt);
-  motor_init(&motor_feeder, 1.0, MOTOR_FEEDER_PIN, MOTOR_FEEDER_INT_PIN, motor_feeder_interrupt);
+    motor_conveyor_interrupt);
+  motor_init(&motor_feeder, 1.0, MOTOR_FEEDER_PIN, MOTOR_FEEDER_INT_PIN, 
+    motor_feeder_interrupt);
 
-  advanced_motor_init(&adv_motor_separator, 1.0, MOTOR_SEPARATOR_PIN1, MOTOR_SEPARATOR_PIN2, 
-                      MOTOR_SEPARATOR_INT_PIN1, MOTOR_SEPARATOR_INT_PIN2, 
-                      adv_motor_separator_interrupt1);
+  advanced_motor_init(&adv_motor_separator, 1.0, MOTOR_SEPARATOR_PIN1, 
+    MOTOR_SEPARATOR_PIN2,MOTOR_SEPARATOR_INT_PIN1, MOTOR_SEPARATOR_INT_PIN2, 
+    adv_motor_separator_interrupt1);
 
   motor_turn_analog(&motor_conveyor, 255);
   default_dist = getRange(RANGE_TRIG, RANGE_ECHO);
 }
 
-int separator_destinations[5] {
-  0, 50, 100, 260, 310
-};
+void loop() 
+{
+  static Ball_Color segments [6] = {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY};
 
-byte next_feeder_destination = 0;
-long next_iteration = 360;
-void loop() {
-  long test_dist = getRange(RANGE_TRIG, RANGE_ECHO);
   static Ball_Color last_ball = EMPTY;
   static long conveyor_target = 90;
   static int feed_counter = 1;
+  static int segments_start = 0;
+  static int segments_end = QUEUE_SIZE - 1;
+
+  long test_dist = getRange(RANGE_TRIG, RANGE_ECHO);
 
   // tests if a ball is in front of sensor
-  if (test_dist < default_dist-1){
+  if (test_dist < default_dist-1)
+  {
       Serial.println(default_dist);
       Serial.println(test_dist);
       Serial.println("ball found");
       segments[segments_end] = (Ball_Color)random(4);
-  } else {
+  } 
+  else 
+  {
     segments[segments_end] = EMPTY;
   }
   
   segments_end++;
-  if (segments_end >= QUEUE_SIZE){
+  if (segments_end >= QUEUE_SIZE)
+  {
     segments_end = 0;
   }
 
-  if (feed_counter == 1) {
+  if (feed_counter == 1) 
+  {
     feed_ball();
     feed_counter++;
-  } else {
+  } 
+  else 
+  {
     feed_counter = 1;
   }
 
   Ball_Color current_ball = segments[segments_start];
 
   segments_start++;
-  if (segments_start >= QUEUE_SIZE){
+  if (segments_start >= QUEUE_SIZE)
+  {
     segments_start = 0;
   }
 
-  if (current_ball != EMPTY && current_ball != last_ball){
+  if (current_ball != EMPTY && current_ball != last_ball)
+  {
     Serial.print("ejecting: ");
     Serial.println(current_ball);
     advanced_motor_turn_to_deg(&adv_motor_separator, bucket_pos[current_ball]);  
@@ -95,15 +94,18 @@ void loop() {
   conveyor_target += 90;
 }
 
-void instant_stop_interrupt() {
+void instant_stop_interrupt() 
+{
   exit(0);
 }
 
-void motor_Wconveyor_interrupt() {
+void motor_conveyor_interrupt() 
+{
   motor_update_degrees(&motor_conveyor);
 }
 
-void motor_feeder_interrupt() {
+void motor_feeder_interrupt() 
+{
   motor_update_degrees(&motor_feeder);
 }
 
@@ -113,14 +115,20 @@ void adv_motor_separator_interrupt1()
   //Serial.println("int");
 }
 
-void feed_ball() {
+void feed_ball() 
+{
   static int deg = 90;
   
   motor_turn_to_deg(&motor_feeder, deg);
   deg+= 90;
-  if (deg == 360) {
+  if (deg == 360) 
+  {
     deg = 0;
   }
 }
 
-
+void button_init(int pin, void(*func)(void))
+{
+  pinMode(pin, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(pin), func, HIGH);
+}

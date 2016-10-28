@@ -7,7 +7,8 @@
  * the directions a motor can turn.
  * these are also used by an advanced motor to increment or derement the degrees
  */
-enum Turning_Direction {
+enum Turning_Direction 
+{
   FORWARD = -1,
   BACKWARD = 1
 };
@@ -21,7 +22,8 @@ typedef signed char Turning_Direction;
 /*
  * the base data for all motor types
  */
-struct Base_Motor {
+struct Base_Motor 
+{
   volatile long deg = 0;
   volatile float degree_ratio = 1;
   volatile long buffer = 0;
@@ -31,7 +33,8 @@ struct Base_Motor {
 /*
  * the data for a motor
  */
-struct Motor {
+struct Motor 
+{
   Base_Motor base;
   byte pin;
 };
@@ -40,7 +43,8 @@ struct Motor {
  * the data for an advanced motor.
  * an advanced motor can turn in both directions
  */
-struct Advanced_Motor {
+struct Advanced_Motor 
+{
   Base_Motor base;
   byte pin1;
   byte pin2;
@@ -52,14 +56,15 @@ struct Advanced_Motor {
 /*
  * initializes a standard motor
  */
-void motor_init(Motor *motor, float degree_ratio, byte pin, byte interrupt_pin, void (*interrupt_handler)(void));
+void motor_init(Motor *motor, float degree_ratio, byte pin, byte interrupt_pin,
+  void (*interrupt_handler)(void));
 
 /*
  * initializes an advanced motor
  */
-void advanced_motor_init(Advanced_Motor *motor, float degree_ratio, byte pin1, byte pin2, 
-                         byte interrupt_pin1, byte interrupt_pin2, 
-                         void (*interrupt_handler1)(void));
+void advanced_motor_init(Advanced_Motor *motor, float degree_ratio, byte pin1, 
+  byte pin2, byte interrupt_pin1, byte interrupt_pin2, 
+  void (*interrupt_handler1)(void));
 
 /*
  * turns an advanced motor to an angle
@@ -69,7 +74,8 @@ void advanced_motor_turn_to_deg(Advanced_Motor* motor, int deg);
 /*
  * turns an advanced motor a number of degrees in a certin direction
  */
-void advanced_motor_turn_deg(Advanced_Motor* motor, int deg, Turning_Direction dir);
+void advanced_motor_turn_deg(Advanced_Motor* motor, int deg, 
+  Turning_Direction dir);
 
 /*
  * turns a motor to an angle
@@ -94,7 +100,8 @@ void motor_stop(Motor* motor);
 /*
  * make an advanced motor turn in a certin direction by an analog value
  */
-void advanced_motor_turn_analog(Advanced_Motor *motor, Turning_Direction dir, byte value);
+void advanced_motor_turn_analog(Advanced_Motor *motor, Turning_Direction dir, 
+  byte value);
 
 /*
  * make an advanced motor turn in a certin direction
