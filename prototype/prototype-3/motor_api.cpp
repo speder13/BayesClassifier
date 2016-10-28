@@ -116,10 +116,10 @@ Serial.println(goal);
   // wait for the motor to reach the goal
   switch (dir) {
     case FORWARD:
-      while (goal < advanced_motor_get_degrees(motor)){Serial.println(advanced_motor_get_degrees(motor));};
+      while (goal < advanced_motor_get_degrees(motor)){};
       break;
     case BACKWARD:
-      while (goal > advanced_motor_get_degrees(motor)){Serial.println(advanced_motor_get_degrees(motor));};
+      while (goal > advanced_motor_get_degrees(motor)){};
       break;
   }
   
