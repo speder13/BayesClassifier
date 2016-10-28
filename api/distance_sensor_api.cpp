@@ -11,7 +11,7 @@ long getRange(int triggerPin, int echoPin){
 
     duration = pulseIn(echoPin, HIGH);
 
-    distance = (duration/2) * 0.0034;
+    distance = (duration/2) * 0.034;
 
     return distance;
 }
