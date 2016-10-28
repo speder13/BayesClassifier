@@ -30,9 +30,4 @@ void component_test_interupt_cost(Advanced_Motor* motor);
 //TODO: TEST
 #endif
 
-#if defined(COMPONENT_TEST_MOTOR_COAST) || defined(COMPONENT_TEST_MOTOR_TIME) || defined(COMPONENT_TEST_INTERRUPT_COST) || defined(COMPONENT_TEST_MOTOR_DEGREE) || defined(API_TEST_MOTOR_TURN_DEG)
-#else
-#define PROGRAM
-#endif
-
 #endif  // COMPONENT_TESTS_H

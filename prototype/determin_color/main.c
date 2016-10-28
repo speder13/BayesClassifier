@@ -1,7 +1,8 @@
 #include <stdio.h>
 
 #define COLORS 8
-typedef enum {
+typedef enumber 
+{
     RED     = 0,
     GREEN   = 1,
     BLUE    = 2,
@@ -10,24 +11,24 @@ typedef enum {
     CYAN    = 5,
     WHITE   = 6,
     BLACK   = 7,
-} color_t;
+} Color;
 
-short colors[COLORS][3];
-
-#define set_color(x, r, g, b) colors[x][0] = r; colors[x][1] = g; colors[x][2] = b; 
-void calibrate_sensor() {
-    set_color(RED,    255,   0,   0);
-    set_color(GREEN,    0, 255,   0);
-    set_color(BLUE,     0,   0, 255);
-    set_color(YELLOW, 255, 255,   0);
-    set_color(PINK,   255,   0, 255);
-    set_color(CYAN,     0, 255, 255);
-    set_color(WHITE,  255, 255, 255);
-    set_color(BLACK ,   0,   0,   0);
-}
+short colors[COLORS][3]
+{
+    { 255,   0,   0 }, // RED
+    {   0, 255,   0 }, // GREEN
+    {   0,   0, 255 }, // BLUE
+    { 255, 255,   0 }, // YELLOW
+    { 255,   0, 255 }, // PINK
+    {   0, 255, 255 }, // CYAN
+    { 255, 255, 255 }, // WHITE
+    {   0,   0,   0 }, // BLACK
+};
 
 #define ifprint(c, s) case c: printf(#s); break;
-void print_color(color_t color) {
+
+void print_color(Color color) 
+{
     switch (color) {
         ifprint(RED,    Red);
         ifprint(GREEN,  Green);
@@ -40,28 +41,35 @@ void print_color(color_t color) {
     }
 }
 
-int isqrt(int num) {
+int isqrt(int number) 
+{
     int res = 0;
     int bit = 1 << 30; // The second-to-top bit is set: 1 << 30 for 32 bits
  
     // "bit" starts at the highest power of four <= the argument.
-    while (bit > num)
+    while (bit > number)
         bit >>= 2;
         
-    while (bit != 0) {
-        if (num >= res + bit) {
-            num -= res + bit;
+    while (bit != 0) 
+    {
+        if (number >= res + bit) 
+        {
+            number -= res + bit;
             res = (res >> 1) + bit;
         }
         else
+        {
             res >>= 1;
+        }
+
         bit >>= 2;
     }
     
     return res;
 }
 
-int euclidean_distance_3d(short* vec1, short* vec2) {
+int euclidean_distanceance_3d(short* vec1, short* vec2) 
+{
     int res1 = vec1[0] - vec2[0];
     int res2 = vec1[1] - vec2[1];
     int res3 = vec1[2] - vec2[2];
@@ -69,16 +77,18 @@ int euclidean_distance_3d(short* vec1, short* vec2) {
     return isqrt(res1*res1 + res2*res2 + res3*res3);
 }
 
-color_t determin_color(short* rgb) {
+Color determin_color(short* rgb) 
+{
     int i, min = 2147483647;
-    color_t res;
+    Color res;
 
-    for (i = 0; i < COLORS; i++) {
-        int dist = euclidean_distance_3d(colors[i], rgb);
+    for (i = 0; i < COLORS; i++) 
+    {
+        int distance = euclidean_distanceance_3d(colors[i], rgb);
         
-        if (dist < min) {
+        if (distance < min) {
             res = i;
-            min = dist;
+            min = distance;
         }
     }
 
@@ -92,7 +102,8 @@ printf(": ");                               \
 print_color(determin_color(name));          \
 printf("\n");                               
 
-int main() {
+int main() 
+{
     calibrate_sensor();
     determin_and_print(redish,    204,   0,   0 );
     determin_and_print(greenish,    0, 153,  51 );

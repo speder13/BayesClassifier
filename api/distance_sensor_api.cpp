@@ -1,17 +1,15 @@
 #include "distance_sensor_api.h"
 
-long getRange(int triggerPin, int echoPin){
-    long duration, distance;
-
-    digitalWrite(triggerPin, LOW);
+int32_t get_range(uint8_t trigger_pin, uint8_t echo_pin)
+{
+    // Ping the ultra sound sensor
+    digitalWrite(trigger_pin, LOW);
     delayMicroseconds(2);
-    digitalWrite(triggerPin, HIGH);
+    digitalWrite(trigger_pin, HIGH);
     delayMicroseconds(10);
-    digitalWrite(triggerPin, LOW);
+    digitalWrite(trigger_pin, LOW);
 
-    duration = pulseIn(echoPin, HIGH);
-
-    distance = (duration/2) * 0.034;
-
-    return distance;
+    // Get the time until the sound returns, and convert that time to a distance
+    // using the speed of sound
+    return (pulseIn(echo_pin, HIGH)/2) * 0.034;
 }

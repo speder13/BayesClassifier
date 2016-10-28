@@ -2,6 +2,9 @@
 // Motor 3: Control feeder
 // Motor 4: Control separator
 
+#ifndef DEFINES_H
+#define DEFINES_H
+
 #define MOTOR_CONVEYOR_PIN 6            // Power conveyor motor
 #define MOTOR_FEEDER_PIN 52             // Power feeder motor
 #define MOTOR_SEPARATOR_PIN1 22         // Control separator motor direction
@@ -19,3 +22,5 @@
 #define RANGE_TRIG 33                   // Start the sensor
 
 #define QUEUE_SIZE 6                    // Size of the conveyor queue
+
+#endif // DEFINES_H

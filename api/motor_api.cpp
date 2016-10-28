@@ -1,25 +1,25 @@
 #include "motor_api.h"
 
 /************************
- * non public functions *
+ * Non public functions *
  ************************/
-long base_motor_get_degrees(Base_Motor* motor) 
+int32_t base_motor_get_degrees(Base_Motor* motor) 
 {
-  long res;
+  int32_t res;
 
-  // mark reading as true, so no race conditions occur
+  // Mark reading as true, so no race conditions occur
   motor->reading = true;
-  res = motor->deg; 
+  res = motor->degrees; 
   motor->reading = false;
 
   return res * motor->degree_ratio;
 }
 
 /********************
- * public functions *
+ * Public functions *
  ********************/
-void motor_init(Motor* motor, float degree_ratio, byte pin, byte interrupt_pin, 
-  void (*interrupt_handler)(void)) 
+void motor_init(Motor* motor, float degree_ratio, uint8_t pin, 
+  uint8_t interrupt_pin, void (*interrupt_handler)(void)) 
 {
   motor->pin = pin;
   motor->base.degree_ratio = degree_ratio;
@@ -30,8 +30,8 @@ void motor_init(Motor* motor, float degree_ratio, byte pin, byte interrupt_pin,
     CHANGE);
 }
 
-void advanced_motor_init(Advanced_Motor* motor, float degree_ratio, byte pin1, 
-  byte pin2, byte interrupt_pin1, byte interrupt_pin2, 
+void advanced_motor_init(Advanced_Motor* motor, float degree_ratio, 
+  uint8_t pin1, uint8_t pin2, uint8_t interrupt_pin1, uint8_t interrupt_pin2, 
   void (*interrupt_handler1)(void))
 {
   motor->pin1 = pin1;
@@ -48,82 +48,87 @@ void advanced_motor_init(Advanced_Motor* motor, float degree_ratio, byte pin1,
     CHANGE);
 }
 
-void advanced_motor_turn_to_deg(Advanced_Motor* motor, int deg) {
-  // turn to degree should only accept a degree value between 
+void advanced_motor_turn_to_degree(Advanced_Motor* motor, uint16_t degree) {
+  // Turn to degree should only accept a degree value between 
   // 0 and 359 inclusive
-  if (deg < 0 || deg >= 360) {
-    Serial.print("advanced_motor_turn_to_deg was supplied ");
+  if (degree >= 360) 
+  {
+    Serial.print("advanced_motor_turn_to_degree was supplied ");
     Serial.print("with an invalid degree: ");
-    Serial.println(deg);
+    Serial.println(degree);
     return;
   }
 
-  long current_pos = advanced_motor_get_degrees(motor);
-  long turns = (current_pos / 360);
+  int32_t current_pos = advanced_motor_get_degrees(motor);
+  int32_t turns = (current_pos / 360);
 
-  // we need to choose two goal, one above and one below our current_pos.
-  // these goal needs to be the full number representaion of the degree number 
+  // We need to choose two goal, one above and one below our current_pos.
+  // These goal needs to be the full number representaion of the degree number 
   // that has to be reached.
-  long goal2, goal1 = 360 * turns + deg;
-  int distance_forward, distance_backward;
+  int32_t goal2, goal1 = 360 * turns + degree;
+  int32_t distance_forward, distance_backward;
 
-  if (goal1 > current_pos) {
-    goal2 = 360 * (turns - 1) + deg;
+  if (goal1 > current_pos) 
+  {
+    goal2 = 360 * (turns - 1) + degree;
     distance_forward = current_pos - goal2;
     distance_backward = goal1 - current_pos;
-  } else if (goal1 < current_pos) {
-    goal2 = 360 * (turns + 1) + deg;
+  }
+  else if (goal1 < current_pos) 
+  {
+    goal2 = 360 * (turns + 1) + degree;
     distance_forward = current_pos - goal1;
     distance_backward = goal2 - current_pos;
-  } else {
+  } 
+  // If goal and current_pos are equal, the motor doesn't need to turn, so
+  // we just return
+  else
+  {
     return;
   }
   
-  // choose which direction to turn based on which distance is shortest
-  if (distance_forward < distance_backward) {
-    Serial.println(distance_forward);
-    advanced_motor_turn_deg(motor, distance_forward, FORWARD);
-  } else {
-    Serial.println(distance_backward);
-    advanced_motor_turn_deg(motor, distance_backward, BACKWARD);
-  }
+  // Choose which direction to turn based on which distance is shortest
+  if (distance_forward < distance_backward)
+    advanced_motor_turn_degrees(motor, distance_forward, FORWARD);
+  else 
+    advanced_motor_turn_degrees(motor, distance_backward, BACKWARD);
 }
 
-void motor_turn_to_deg(Motor* motor, int deg) {
-  // turn to degree should only accept a degree value between 
+void motor_turn_to_degree(Motor* motor, uint16_t degree) 
+{
+  // Turn to degree should only accept a degree value between 
   // 0 and 359 inclusive
-  if (deg < 0 || deg >= 360) {
-    Serial.print("motor_turn_to_deg was supplied with an invalid degree: ");
-    Serial.println(deg);
+  if (degree >= 360) 
+  {
+    Serial.print("motor_turn_to_degree was supplied with an invalid degree: ");
+    Serial.println(degree);
     return;
   }
 
-  long current_pos = motor_get_degrees(motor);
-  long turns = (current_pos / 360);
-  long goal = 360 * turns + deg;
+  int32_t current_pos = motor_get_degrees(motor);
+  int32_t turns = (current_pos / 360);
+  int32_t goal = 360 * turns + degree;
 
-  // if goal is lower than current_pos, then we need to choose a new goal, 
+  // If goal is lower than current_pos, then we need to choose a new goal, 
   // 360 degrees bigger
-  if (goal < current_pos) {
-    goal = 360 * (turns + 1) + deg;
-  }
+  if (goal < current_pos) 
+    goal = 360 * (turns + 1) + degree;
 
-  // turn motor by the distance to the goal
-  motor_turn_deg(motor, goal - current_pos);
+  // Turn motor by the distance to the goal
+  motor_turn_degrees(motor, goal - current_pos);
 }
 
-void advanced_motor_turn_deg(Advanced_Motor* motor, int deg, 
-  Turning_Direction dir)
+void advanced_motor_turn_degrees(Advanced_Motor* motor, uint16_t degrees, 
+  Turning_Direction direction)
 {
-  // calculate the goal that the motor should reach
-  long goal = advanced_motor_get_degrees(motor) + (deg * dir);
+  // Calculate the goal that the motor should reach
+  int32_t goal = advanced_motor_get_degrees(motor) + (degrees * direction);
 
-  advanced_motor_turn(motor, dir);
+  advanced_motor_turn(motor, direction);
 
-Serial.println(goal);
-
-  // wait for the motor to reach the goal
-  switch (dir) {
+  // Wait for the motor to reach the goal
+  switch (direction) 
+  {
     case FORWARD:
       while (goal < advanced_motor_get_degrees(motor));
       break;
@@ -135,14 +140,14 @@ Serial.println(goal);
   advanced_motor_stop(motor);
 }
 
-void motor_turn_deg(Motor* motor, int deg)
+void motor_turn_degrees(Motor* motor, uint16_t degrees)
 {
-  // calculate the goal that the motor should reach
-  int goal = motor_get_degrees(motor) + (deg);
+  // Calculate the goal that the motor should reach
+  int32_t goal = motor_get_degrees(motor) + degrees;
 
   motor_turn(motor);
 
-  // wait for the motor to reach the goal
+  // Wait for the motor to reach the goal
   while (goal > motor_get_degrees(motor));
 
   motor_stop(motor);
@@ -150,17 +155,14 @@ void motor_turn_deg(Motor* motor, int deg)
 
 void advanced_motor_stop(Advanced_Motor* motor)
 {
-  // HACK: to break, we turn the motor in the other direction for a 
+  // HACK: To break, we turn the motor in the other direction for a 
   // fix amount of time.
   // It is not perfect, but it does reduce the coasting by a lot
-  if (motor->dir == FORWARD) 
-  {
+  if (motor->direction == FORWARD) 
       advanced_motor_turn(motor, BACKWARD);
-  } 
   else 
-  {
       advanced_motor_turn(motor, FORWARD);
-  }
+      
   delay(50); // 50ms seems like a good delay
   digitalWrite(motor->pin1, LOW);
   digitalWrite(motor->pin2, LOW);
@@ -172,9 +174,9 @@ void motor_stop(Motor* motor)
   digitalWrite(motor->pin, LOW);
 }
 
-void advanced_motor_turn(Advanced_Motor* motor, Turning_Direction dir) 
+void advanced_motor_turn(Advanced_Motor* motor, Turning_Direction direction) 
 {
-  switch(dir)
+  switch(direction)
   {
     case FORWARD:
       digitalWrite(motor->pin1, HIGH);
@@ -192,10 +194,10 @@ void advanced_motor_turn(Advanced_Motor* motor, Turning_Direction dir)
   }
 }
 
-void advanced_motor_turn_analog(Advanced_Motor* motor, Turning_Direction dir, 
-  byte value) 
+void advanced_motor_turn_analog(Advanced_Motor* motor, 
+  Turning_Direction direction, uint8_t value) 
 {
-  switch(dir)
+  switch(direction)
   {
     case FORWARD:
       analogWrite(motor->pin1, value);
@@ -218,29 +220,32 @@ void motor_turn(Motor* motor)
   digitalWrite(motor->pin, HIGH);
 }
 
-void motor_turn_analog(Motor* motor, byte value)
+void motor_turn_analog(Motor* motor, uint8_t value)
 {
   analogWrite(motor->pin, value);
 }
 
-long motor_get_degrees(Motor* motor) 
+int32_t motor_get_degrees(Motor* motor) 
 {
   return base_motor_get_degrees(&motor->base);
 }
 
-long advanced_motor_get_degrees(Advanced_Motor* motor) 
+int32_t advanced_motor_get_degrees(Advanced_Motor* motor) 
 {
   return base_motor_get_degrees(&motor->base);
 }
 
 void motor_update_degrees(Motor* motor) {
-  // if degrees are being read, update a buffer instead to avoid race condtions
-  if (motor->base.reading) {
+  // If degrees are being read, update a buffer instead to avoid race condtions
+  if (motor->base.reading) 
+  {
     motor->base.buffer++;
-  } else {
-    // we need to add and reset the buffer when we are allowed to 
+  } 
+  else 
+  {
+    // We need to add and reset the buffer when we are allowed to 
     // write to the degrees
-    motor->base.deg += 1 + motor->base.buffer;
+    motor->base.degrees += 1 + motor->base.buffer;
     motor->base.buffer = 0;
   }
 }
@@ -250,30 +255,32 @@ void advanced_motor_update_degrees(Advanced_Motor* motor)
   byte pattern = digitalRead(motor->interrupt_pin1);
   pattern |= (digitalRead(motor->interrupt_pin2) << 1);
 
-  // we determin the direction by a pattern formed by the values 
+  // We determin the direction by a pattern formed by the values 
   // read from pin1 and pin2
   // LOW = 0, HIGH = 1
-  // 00 and 11 = FORWARD
-  // 01 and 10 = BACKWARD
-  switch (pattern) {
+  switch (pattern) 
+  {
     case 0b11: case 0b00:
-      motor->dir = FORWARD;
+      motor->direction = FORWARD;
       break;
     case 0b10: case 0b01:
-      motor->dir = BACKWARD;
+      motor->direction = BACKWARD;
       break;
     default:
       Serial.println("Error in determin direction of motor");
       break;
   }
 
-  // if degrees are being read, update a buffer instead to avoid race condtions
-  if (motor->base.reading) {
-    motor->base.buffer += motor->dir;
-  } else {
-    // we need to add and reset the buffer when we are allowed to 
+  // If degrees are being read, update a buffer instead to avoid race condtions
+  if (motor->base.reading) 
+  {
+    motor->base.buffer += motor->direction;
+  } 
+  else
+  {
+    // We need to add and reset the buffer when we are allowed to 
     // write to the degrees
-    motor->base.deg += motor->dir + motor->base.buffer;
+    motor->base.degrees += motor->direction + motor->base.buffer;
     motor->base.buffer = 0;
   }
 }

@@ -3,15 +3,22 @@
 #include "motor_api.h"
 #include "distance_sensor_api.h"
 
-enum Ball_Color {GREEN, YELLOW, RED, BLUE, EMPTY};
-int bucket_pos [5] = {0, 50, 100, 260, 310};
+enum Ball_Color 
+{
+  GREEN, 
+  YELLOW, 
+  RED, 
+  BLUE, 
+  EMPTY
+};
 
-long default_dist = 0;
+int32_t default_dist = 0;
 
 Motor motor_conveyor, motor_feeder;
 Advanced_Motor adv_motor_separator;
 
-void setup() {
+void setup() 
+{
   //exit(0);
   Serial.begin(9200);
 
@@ -31,26 +38,26 @@ void setup() {
     adv_motor_separator_interrupt1);
 
   motor_turn_analog(&motor_conveyor, 255);
-  default_dist = getRange(RANGE_TRIG, RANGE_ECHO);
+  default_dist = get_range(RANGE_TRIG, RANGE_ECHO);
 }
 
 void loop() 
 {
-  static Ball_Color segments [6] = {EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY};
-
+  static int16_t bucket_pos [5] = { 0, 50, 100, 260, 310 };
+  static Ball_Color segments[QUEUE_SIZE] = { EMPTY };
+  static uint8_t segments_start = 0;
+  static uint8_t segments_end = QUEUE_SIZE - 1;
   static Ball_Color last_ball = EMPTY;
-  static long conveyor_target = 90;
-  static int feed_counter = 1;
-  static int segments_start = 0;
-  static int segments_end = QUEUE_SIZE - 1;
+  static int32_t conveyor_target = 90;
+  static uint8_t feed_counter = 1;
 
-  long test_dist = getRange(RANGE_TRIG, RANGE_ECHO);
+  int32_t test_dist = get_range(RANGE_TRIG, RANGE_ECHO);
 
-  // tests if a ball is in front of sensor
+  // Tests if a ball is in front of sensor
   if (test_dist < default_dist-1)
   {
-      Serial.println(default_dist);
-      Serial.println(test_dist);
+      //Serial.println(default_dist);
+      //Serial.println(test_dist);
       Serial.println("ball found");
       segments[segments_end] = (Ball_Color)random(4);
   } 
@@ -87,7 +94,8 @@ void loop()
   {
     Serial.print("ejecting: ");
     Serial.println(current_ball);
-    advanced_motor_turn_to_deg(&adv_motor_separator, bucket_pos[current_ball]);  
+    advanced_motor_turn_to_degree(&adv_motor_separator, 
+      bucket_pos[current_ball]);  
   }
 
   while(motor_get_degrees(&motor_conveyor) < conveyor_target);
@@ -117,9 +125,9 @@ void adv_motor_separator_interrupt1()
 
 void feed_ball() 
 {
-  static int deg = 90;
+  static int16_t deg = 90;
   
-  motor_turn_to_deg(&motor_feeder, deg);
+  motor_turn_to_degree(&motor_feeder, deg);
   deg+= 90;
   if (deg == 360) 
   {
@@ -127,7 +135,7 @@ void feed_ball()
   }
 }
 
-void button_init(int pin, void(*func)(void))
+void button_init(int16_t pin, void(*func)(void))
 {
   pinMode(pin, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(pin), func, HIGH);
