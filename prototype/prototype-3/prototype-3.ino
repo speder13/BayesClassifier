@@ -22,13 +22,20 @@
 Motor motor_conveyor, motor_feeder;
 Advanced_Motor adv_motor_separator;
 
+void button_init(int pin, void(*func)(void))
+{
+  pinMode(pin, INPUT_PULLUP);
+  attachInterrupt(digitalPinToInterrupt(pin), func, HIGH);
+}
+
 void setup() {
   //exit(0);
   Serial.begin(9200);
 
   // Init hardware components, sensors and actuators
-  pinMode(BUTTON_INT_PIN, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(BUTTON_INT_PIN), instant_stop_interrupt, HIGH);
+  //pinMode(BUTTON_INT_PIN, INPUT_PULLUP);
+  //attachInterrupt(digitalPinToInterrupt(BUTTON_INT_PIN), instant_stop_interrupt, HIGH);
+  button_init(BUTTON_INT_PIN, instant_stop_interrupt);
 
   motor_init(&motor_conveyor, 0.36, MOTOR_CONVEYOR_PIN, MOTOR_CONVEYOR_INT_PIN, 
               motor_conveyor_interrupt);
