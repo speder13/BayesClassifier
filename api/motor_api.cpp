@@ -240,8 +240,8 @@ void motor_update_degrees(Motor* motor) {
   if (motor->base.reading) 
   {
     motor->base.buffer++;
-  } 
-  else 
+  }
+  else
   {
     // We need to add and reset the buffer when we are allowed to 
     // write to the degrees

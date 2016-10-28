@@ -4,6 +4,7 @@
 
 #ifndef DEFINES_H
 #define DEFINES_H
+#include <stddef.h>
 
 #define MOTOR_CONVEYOR_PIN 6            // Power conveyor motor
 #define MOTOR_FEEDER_PIN 52             // Power feeder motor
@@ -16,11 +17,31 @@
 #define MOTOR_SEPARATOR_INT_PIN2 31     // Used to read direction, not an actual 
                                         // interrupt
 
-#define BUTTON_INT_PIN 21               // Emergency stop int port
+#define BUTTON_INT_PIN 19               // Emergency stop int port
 
 #define RANGE_ECHO 32                   // Read distance
 #define RANGE_TRIG 33                   // Start the sensor
 
 #define QUEUE_SIZE 6                    // Size of the conveyor queue
+
+#define CALIBRACTION_ITERATIONS 100
+
+#define DEBUGGING 0
+
+#if DEBUGGING
+#define DEBUG_PRINT(x) Serial.print(x)
+#define DEBUG_PRINTLN(x) Serial.println(x)
+#else
+#define DEBUG_PRINT(x)
+#define DEBUG_PRINTLN(x)
+#endif
+
+#define DEBUG_PRINT_VAR(var) \
+DEBUG_PRINT(#var);  \
+DEBUG_PRINT(": ");  \
+DEBUG_PRINT(var)
+
+#define DEBUG_PRINTLN_VAR(var) DEBUG_PRINT_VAR(var); DEBUG_PRINTLN("")
+
 
 #endif // DEFINES_H
