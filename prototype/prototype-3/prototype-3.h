@@ -16,10 +16,4 @@ struct Segment_Queue
   uint8_t index = 0;
 };
 
-Motor motor_conveyor, motor_feeder;
-Advanced_Motor adv_motor_separator;
-volatile bool running = true;
-volatile bool stopped = false;
-int32_t distance_to_wall;
-
 #endif // _PROTOTYPE_3_H_
