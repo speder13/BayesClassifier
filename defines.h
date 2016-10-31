@@ -2,8 +2,8 @@
 // Motor 3: Control feeder
 // Motor 4: Control separator
 
-#ifndef DEFINES_H
-#define DEFINES_H
+#ifndef _DEFINES_H_
+#define _DEFINES_H_
 #include <stddef.h>
 
 #define MOTOR_CONVEYOR_PIN 6            // Power conveyor motor
@@ -44,4 +44,4 @@ DEBUG_PRINT(var)
 #define DEBUG_PRINTLN_VAR(var) DEBUG_PRINT_VAR(var); DEBUG_PRINTLN("")
 
 
-#endif // DEFINES_H
+#endif // _DEFINES_H_

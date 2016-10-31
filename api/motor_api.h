@@ -1,5 +1,5 @@
-#ifndef MOTOR_API_H
-#define MOTOR_API_H
+#ifndef _MOTOR_API_H_
+#define _MOTOR_API_H_
 
 #include "Arduino.h"
 #include <stdint.h>
@@ -135,4 +135,4 @@ void motor_update_degrees(Motor* motor);
  */
 void advanced_motor_update_degrees(Advanced_Motor* motor);
 
-#endif
+#endif // _MOTOR_API_H_

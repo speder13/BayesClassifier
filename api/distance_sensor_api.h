@@ -1,5 +1,5 @@
-#ifndef DISTANCE_SENSOR_H
-#define DISTANCE_SENSOR_H
+#ifndef _DISTANCE_SENSOR_H_
+#define _DISTANCE_SENSOR_H_
 
 #include "Arduino.h"
 #include <stdint.h>
@@ -9,4 +9,4 @@
  */
 int32_t get_range(uint8_t trigger_pin, uint8_t echo_pin);
 
-#endif
+#endif // _DISTANCE_SENSOR_H_

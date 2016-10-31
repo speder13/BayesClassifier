@@ -1,5 +1,5 @@
-#ifndef COMPONENT_TESTS_H
-#define COMPONENT_TESTS_H
+#ifndef _COMPONENT_TESTS_H_
+#define _COMPONENT_TESTS_H_
 
 #include "motor_api.h"
 #include "Arduino.h"
@@ -30,4 +30,4 @@ void component_test_interupt_cost(Advanced_Motor* motor);
 //TODO: TEST
 #endif
 
-#endif  // COMPONENT_TESTS_H
+#endif  // _COMPONENT_TESTS_H_

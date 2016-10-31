@@ -1,21 +1,7 @@
 #include "defines.h"
 #include "motor_api.h"
 #include "distance_sensor_api.h"
-
-enum Ball_Color 
-{
-  GREEN, 
-  YELLOW, 
-  RED, 
-  BLUE, 
-  EMPTY
-};
-
-struct Segment_Queue 
-{
-  Ball_Color data[QUEUE_SIZE] = { EMPTY };
-  uint8_t index = 0;
-};
+#include "prototype-3.h"
 
 Motor motor_conveyor, motor_feeder;
 Advanced_Motor adv_motor_separator;
