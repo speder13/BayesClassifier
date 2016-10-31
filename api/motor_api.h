@@ -19,10 +19,10 @@ enum Turning_Direction
  */
 struct Base_Motor 
 {
-  volatile int32_t degrees = 0;
-  volatile int32_t buffer = 0;
-  volatile bool reading = false;
-  float degree_ratio = 1;
+  volatile int32_t degrees;
+  volatile int32_t buffer;
+  volatile bool reading;
+  float degree_ratio;
 };
 
 /*

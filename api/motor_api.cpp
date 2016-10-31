@@ -23,6 +23,9 @@ void motor_init(Motor* motor, float degree_ratio, uint8_t pin,
 {
   motor->pin = pin;
   motor->base.degree_ratio = degree_ratio;
+  motor->base.buffer = 0;
+  motor->base.degrees = 0;
+  motor->base.reading = false;
 
   pinMode(interrupt_pin, INPUT_PULLUP);
   pinMode(pin, OUTPUT);
@@ -39,6 +42,9 @@ void advanced_motor_init(Advanced_Motor* motor, float degree_ratio,
   motor->interrupt_pin1 = interrupt_pin1;
   motor->interrupt_pin2 = interrupt_pin2;
   motor->base.degree_ratio = degree_ratio;
+  motor->base.buffer = 0;
+  motor->base.degrees = 0;
+  motor->base.reading = false;
 
   pinMode(interrupt_pin1, INPUT_PULLUP);
   pinMode(interrupt_pin2, INPUT_PULLUP);

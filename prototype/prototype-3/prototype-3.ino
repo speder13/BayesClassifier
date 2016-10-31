@@ -5,6 +5,7 @@
 
 Motor motor_conveyor, motor_feeder;
 Advanced_Motor adv_motor_separator;
+Ultra_Sound_Sensor distance_sensor;
 volatile bool running = true;
 volatile bool stopped = false;
 int32_t distance_to_wall;
@@ -17,9 +18,7 @@ void setup()
 
   Serial.println("Initializing all components...");
   Serial.println("- Ultra sound sensor...");
-  // Init hardware components, sensors and actuators
-  pinMode(RANGE_ECHO, INPUT);
-  pinMode(RANGE_TRIG, OUTPUT);
+  distance_sensor_init(&distance_sensor, RANGE_TRIG, RANGE_ECHO);
 
   Serial.println("--- Calibrating...");
   distance_to_wall = calibrate_ultra_sound_sensor();
@@ -71,12 +70,12 @@ void button_init(int16_t pin, void(*func)(void))
 
 int32_t calibrate_ultra_sound_sensor()
 {
-  int32_t min = get_range(RANGE_TRIG, RANGE_ECHO);
+  int32_t min = distance_sensor_measure_distance(&distance_sensor);
   int32_t current;
   for (uint8_t i = 0; i < CALIBRACTION_ITERATIONS - 1; i++)
   {
     DEBUG_PRINTLN_VAR(min);
-    current = get_range(RANGE_TRIG, RANGE_ECHO);
+    current = distance_sensor_measure_distance(&distance_sensor);
 
     if (current < min)
       min = current;
@@ -96,7 +95,7 @@ void loop()
     static int32_t conveyor_target = 90;
 
     Ball_Color read_color = EMPTY;
-    int32_t test_dist = get_range(RANGE_TRIG, RANGE_ECHO);
+    int32_t test_dist = distance_sensor_measure_distance(&distance_sensor);
 
     DEBUG_PRINT_VAR(test_dist);
     DEBUG_PRINT(" ");
