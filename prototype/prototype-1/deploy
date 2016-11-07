@@ -1,3 +1,0 @@
-#!/bin/bash
-make all
-sudo /home/palmelund/dev/bricxcc/NeXTTool /COM=usb -download=/home/palmelund/dev/p5-sorting-machine/prototype/prototype-1/sorting_machine_OSEK.rxe
