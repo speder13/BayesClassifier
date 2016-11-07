@@ -16,18 +16,18 @@ void setup()
   Serial.begin(9200);
   while (!Serial);
 
-  Serial.println("Initializing all components...");
-  Serial.println("- Ultra sound sensor...");
+  DEBUG_PRINTLN("Initializing all components...");
+  DEBUG_PRINTLN("- Ultra sound sensor...");
   distance_sensor_init(&distance_sensor, RANGE_TRIG, RANGE_ECHO);
 
-  Serial.println("--- Calibrating...");
+  DEBUG_PRINTLN("--- Calibrating...");
   distance_to_wall = calibrate_ultra_sound_sensor();
-  Serial.print("--- distance_to_wall: "); Serial.println(distance_to_wall);
+  DEBUG_PRINT("--- distance_to_wall: "); DEBUG_PRINTLN(distance_to_wall);
   
-  Serial.println("- Button...");
+  DEBUG_PRINTLN("- Button...");
   button_init(BUTTON_INT_PIN, instant_stop_interrupt);
 
-  Serial.println("- Motors...");
+  DEBUG_PRINTLN("- Motors...");
   motor_init(&motor_conveyor, 0.36, MOTOR_CONVEYOR_PIN, MOTOR_CONVEYOR_INT_PIN, 
     motor_conveyor_interrupt);
   motor_init(&motor_feeder, 1.0, MOTOR_FEEDER_PIN, MOTOR_FEEDER_INT_PIN, 
@@ -37,11 +37,11 @@ void setup()
     MOTOR_SEPARATOR_PIN2,MOTOR_SEPARATOR_INT_PIN1, MOTOR_SEPARATOR_INT_PIN2, 
     adv_motor_separator_interrupt1);
 
-  Serial.println("Starting the sorting machine...");
+  DEBUG_PRINTLN("Starting the sorting machine...");
   motor_turn_analog(&motor_conveyor, 255);
 
 //  while (running){
-//    Serial.println(get_range(RANGE_TRIG, RANGE_ECHO));
+//    DEBUG_PRINTLN(get_range(RANGE_TRIG, RANGE_ECHO));
 //    delay(250);
 //  }
 }
@@ -59,7 +59,7 @@ void motor_feeder_interrupt()
 void adv_motor_separator_interrupt1() 
 {
   advanced_motor_update_degrees(&adv_motor_separator);
-  //Serial.println("int");
+  //DEBUG_PRINTLN("int");
 }
 
 void button_init(int16_t pin, void(*func)(void))
@@ -105,8 +105,8 @@ void loop()
     if (test_dist < distance_to_wall)
     {
       read_color = read_color_sensor();
-      Serial.print("ball found: ");
-      Serial.println(get_color_name(read_color));
+      DEBUG_PRINT("ball found: ");
+      DEBUG_PRINTLN(get_color_name(read_color));
     }
     
     enqueue_segment(&segment_queue, read_color);
@@ -118,8 +118,8 @@ void loop()
     // different from the last ball
     if (current_ball != EMPTY && current_ball != last_ball)
     {
-      Serial.print("ejecting: ");
-      Serial.println(get_color_name(current_ball));
+      DEBUG_PRINT("ejecting: ");
+      DEBUG_PRINTLN(get_color_name(current_ball));
       advanced_motor_turn_to_degree(&adv_motor_separator, 
         bucket_pos[current_ball]);
 
@@ -134,7 +134,7 @@ void loop()
     motor_stop(&motor_conveyor);
     delay(1000);
     stopped = true;
-    Serial.println("The sorting machine has stopped.");
+    DEBUG_PRINTLN("The sorting machine has stopped.");
     while (!running);
     motor_turn(&motor_conveyor);
     stopped = false;
@@ -203,7 +203,7 @@ char* get_color_name(Ball_Color color)
     case EMPTY:
       return (char*)"Empty";
     default:
-      Serial.print("Error in get_color_name");
+      DEBUG_PRINT("Error in get_color_name");
       delay(1000);
       exit(0);
   }
@@ -214,12 +214,12 @@ void instant_stop_interrupt()
   if (running == true && stopped == false)
   {
     running = false;
-    Serial.println("Stopping sorting machine...");
+    DEBUG_PRINTLN("Stopping sorting machine...");
   }
   else if (running == false && stopped == true)
   {
     running = true;
-    Serial.println("Starting sorting machine...");
+    DEBUG_PRINTLN("Starting sorting machine...");
     delay(1000);
   }
 }

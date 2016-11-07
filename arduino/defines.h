@@ -26,6 +26,10 @@
 
 #define CALIBRACTION_ITERATIONS 100
 
+#define LED_RED_PIN
+#define LED_YELLOW_PIN
+#define LED_GREEN_PIN
+
 #define DEBUGGING 0
 
 #if DEBUGGING
@@ -36,12 +40,19 @@
 #define DEBUG_PRINTLN(x)
 #endif
 
+#if DEBUGGING
 #define DEBUG_PRINT_VAR(var) \
 DEBUG_PRINT(#var);  \
 DEBUG_PRINT(": ");  \
 DEBUG_PRINT(var)
+#else
+#define DEBUG_PRINT_VAR(var)
+#endif
 
+#if DEBUGGING
 #define DEBUG_PRINTLN_VAR(var) DEBUG_PRINT_VAR(var); DEBUG_PRINTLN("")
-
+#else
+#define DEBUG_PRINTLN_VAR(var)
+#endif
 
 #endif // _DEFINES_H_
