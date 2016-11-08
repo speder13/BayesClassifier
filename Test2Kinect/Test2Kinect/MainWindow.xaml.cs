@@ -267,7 +267,7 @@ namespace Test2Kinect
                 }
                 default:
                 {
-                        //Default something.
+                    //Default something.
                     break;
                 }
             }
