@@ -47,6 +47,8 @@
             this.pictureBoxBgnAfter = new System.Windows.Forms.PictureBox();
             this.labelIgnoreColors = new System.Windows.Forms.Label();
             this.pictureBoxBackgroundCleaned = new System.Windows.Forms.PictureBox();
+            this.buttonGenFromFile = new System.Windows.Forms.Button();
+            this.buttonArff = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxOriginal)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCleaned)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxBgndOrig)).BeginInit();
@@ -218,11 +220,33 @@
             this.pictureBoxBackgroundCleaned.TabIndex = 18;
             this.pictureBoxBackgroundCleaned.TabStop = false;
             // 
+            // buttonGenFromFile
+            // 
+            this.buttonGenFromFile.Location = new System.Drawing.Point(444, 626);
+            this.buttonGenFromFile.Name = "buttonGenFromFile";
+            this.buttonGenFromFile.Size = new System.Drawing.Size(86, 23);
+            this.buttonGenFromFile.TabIndex = 19;
+            this.buttonGenFromFile.Text = "DONT Push !!";
+            this.buttonGenFromFile.UseVisualStyleBackColor = true;
+            this.buttonGenFromFile.Click += new System.EventHandler(this.buttonGenFromFile_Click);
+            // 
+            // buttonArff
+            // 
+            this.buttonArff.Location = new System.Drawing.Point(570, 626);
+            this.buttonArff.Name = "buttonArff";
+            this.buttonArff.Size = new System.Drawing.Size(75, 23);
+            this.buttonArff.TabIndex = 20;
+            this.buttonArff.Text = "Arff File";
+            this.buttonArff.UseVisualStyleBackColor = true;
+            this.buttonArff.Click += new System.EventHandler(this.buttonArff_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1177, 653);
+            this.Controls.Add(this.buttonArff);
+            this.Controls.Add(this.buttonGenFromFile);
             this.Controls.Add(this.pictureBoxBackgroundCleaned);
             this.Controls.Add(this.labelIgnoreColors);
             this.Controls.Add(this.pictureBoxBgnAfter);
@@ -275,6 +299,8 @@
         private System.Windows.Forms.PictureBox pictureBoxBgnAfter;
         private System.Windows.Forms.Label labelIgnoreColors;
         private System.Windows.Forms.PictureBox pictureBoxBackgroundCleaned;
+        private System.Windows.Forms.Button buttonGenFromFile;
+        private System.Windows.Forms.Button buttonArff;
     }
 }
 
