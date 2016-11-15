@@ -28,9 +28,10 @@ void setup()
 
 void loop()
 {
-    int32_t test_dist = distance_sensor_double_take(); //distance_sensor_measure_distance(&distance_sensor);
+    //int32_t test_dist = distance_sensor_double_take(); //distance_sensor_measure_distance(&distance_sensor);
     //Serial.println(test_dist);
 
+/*
     if(test_dist + 10 < distance_to_wall)
     {
         Serial.print("Log: ");
@@ -45,9 +46,11 @@ void loop()
     }
 
     return;
+    */
+
     uint32_t pos = motor_get_degrees(&motor_conveyor);
     // Change TARGET1 for delay before requesting image
-    while(pos + 225 > motor_get_degrees(&motor_conveyor)) {}
+    while(pos + 270 > motor_get_degrees(&motor_conveyor)) {}
     Serial.print("Command:");
     Serial.print(2);
     Serial.println("end");
