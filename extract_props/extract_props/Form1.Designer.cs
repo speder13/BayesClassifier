@@ -42,8 +42,16 @@
             this.labelblackpixels = new System.Windows.Forms.Label();
             this.labeldifference = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
+            this.checkBoxbackground = new System.Windows.Forms.CheckBox();
+            this.pictureBoxBgndOrig = new System.Windows.Forms.PictureBox();
+            this.pictureBoxBgnAfter = new System.Windows.Forms.PictureBox();
+            this.labelIgnoreColors = new System.Windows.Forms.Label();
+            this.pictureBoxBackgroundCleaned = new System.Windows.Forms.PictureBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxOriginal)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCleaned)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxBgndOrig)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxBgnAfter)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxBackgroundCleaned)).BeginInit();
             this.SuspendLayout();
             // 
             // pictureBoxOriginal
@@ -56,7 +64,7 @@
             // 
             // pictureBoxCleaned
             // 
-            this.pictureBoxCleaned.Location = new System.Drawing.Point(765, 12);
+            this.pictureBoxCleaned.Location = new System.Drawing.Point(12, 337);
             this.pictureBoxCleaned.Name = "pictureBoxCleaned";
             this.pictureBoxCleaned.Size = new System.Drawing.Size(400, 200);
             this.pictureBoxCleaned.TabIndex = 1;
@@ -134,7 +142,7 @@
             // labelwhitepixels
             // 
             this.labelwhitepixels.AutoSize = true;
-            this.labelwhitepixels.Location = new System.Drawing.Point(762, 228);
+            this.labelwhitepixels.Location = new System.Drawing.Point(9, 540);
             this.labelwhitepixels.Name = "labelwhitepixels";
             this.labelwhitepixels.Size = new System.Drawing.Size(35, 13);
             this.labelwhitepixels.TabIndex = 10;
@@ -143,7 +151,7 @@
             // labelblackpixels
             // 
             this.labelblackpixels.AutoSize = true;
-            this.labelblackpixels.Location = new System.Drawing.Point(762, 247);
+            this.labelblackpixels.Location = new System.Drawing.Point(9, 559);
             this.labelblackpixels.Name = "labelblackpixels";
             this.labelblackpixels.Size = new System.Drawing.Size(35, 13);
             this.labelblackpixels.TabIndex = 11;
@@ -152,7 +160,7 @@
             // labeldifference
             // 
             this.labeldifference.AutoSize = true;
-            this.labeldifference.Location = new System.Drawing.Point(762, 268);
+            this.labeldifference.Location = new System.Drawing.Point(9, 580);
             this.labeldifference.Name = "labeldifference";
             this.labeldifference.Size = new System.Drawing.Size(35, 13);
             this.labeldifference.TabIndex = 12;
@@ -160,17 +168,66 @@
             // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(386, 422);
+            this.textBox1.Location = new System.Drawing.Point(202, 593);
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(369, 149);
+            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.textBox1.Size = new System.Drawing.Size(236, 56);
             this.textBox1.TabIndex = 13;
+            // 
+            // checkBoxbackground
+            // 
+            this.checkBoxbackground.AutoSize = true;
+            this.checkBoxbackground.Location = new System.Drawing.Point(649, 12);
+            this.checkBoxbackground.Name = "checkBoxbackground";
+            this.checkBoxbackground.Size = new System.Drawing.Size(110, 17);
+            this.checkBoxbackground.TabIndex = 14;
+            this.checkBoxbackground.Text = "Backgroundmode";
+            this.checkBoxbackground.UseVisualStyleBackColor = true;
+            // 
+            // pictureBoxBgndOrig
+            // 
+            this.pictureBoxBgndOrig.Location = new System.Drawing.Point(765, 12);
+            this.pictureBoxBgndOrig.Name = "pictureBoxBgndOrig";
+            this.pictureBoxBgndOrig.Size = new System.Drawing.Size(400, 200);
+            this.pictureBoxBgndOrig.TabIndex = 15;
+            this.pictureBoxBgndOrig.TabStop = false;
+            // 
+            // pictureBoxBgnAfter
+            // 
+            this.pictureBoxBgnAfter.Location = new System.Drawing.Point(765, 218);
+            this.pictureBoxBgnAfter.Name = "pictureBoxBgnAfter";
+            this.pictureBoxBgnAfter.Size = new System.Drawing.Size(400, 200);
+            this.pictureBoxBgnAfter.TabIndex = 16;
+            this.pictureBoxBgnAfter.TabStop = false;
+            // 
+            // labelIgnoreColors
+            // 
+            this.labelIgnoreColors.AutoSize = true;
+            this.labelIgnoreColors.Location = new System.Drawing.Point(428, 12);
+            this.labelIgnoreColors.Name = "labelIgnoreColors";
+            this.labelIgnoreColors.Size = new System.Drawing.Size(134, 13);
+            this.labelIgnoreColors.TabIndex = 17;
+            this.labelIgnoreColors.Text = "Background colors loaded:";
+            // 
+            // pictureBoxBackgroundCleaned
+            // 
+            this.pictureBoxBackgroundCleaned.Location = new System.Drawing.Point(765, 424);
+            this.pictureBoxBackgroundCleaned.Name = "pictureBoxBackgroundCleaned";
+            this.pictureBoxBackgroundCleaned.Size = new System.Drawing.Size(400, 200);
+            this.pictureBoxBackgroundCleaned.TabIndex = 18;
+            this.pictureBoxBackgroundCleaned.TabStop = false;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1177, 653);
+            this.Controls.Add(this.pictureBoxBackgroundCleaned);
+            this.Controls.Add(this.labelIgnoreColors);
+            this.Controls.Add(this.pictureBoxBgnAfter);
+            this.Controls.Add(this.pictureBoxBgndOrig);
+            this.Controls.Add(this.checkBoxbackground);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.labeldifference);
             this.Controls.Add(this.labelblackpixels);
@@ -189,6 +246,9 @@
             this.Text = "Form1";
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxOriginal)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxCleaned)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxBgndOrig)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxBgnAfter)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxBackgroundCleaned)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -210,6 +270,11 @@
         private System.Windows.Forms.Label labelblackpixels;
         private System.Windows.Forms.Label labeldifference;
         private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.CheckBox checkBoxbackground;
+        private System.Windows.Forms.PictureBox pictureBoxBgndOrig;
+        private System.Windows.Forms.PictureBox pictureBoxBgnAfter;
+        private System.Windows.Forms.Label labelIgnoreColors;
+        private System.Windows.Forms.PictureBox pictureBoxBackgroundCleaned;
     }
 }
 
