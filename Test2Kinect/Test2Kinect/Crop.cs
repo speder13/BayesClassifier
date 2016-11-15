@@ -17,7 +17,7 @@ namespace Test2Kinect
             and rerwitten to fit our needs. 28/10/2016 - 14:22 */
 
 
-            WriteableBitmap tmp = new WriteableBitmap(200, 200, 96.0, 96.0, PixelFormats.Bgr32, null);
+            WriteableBitmap tmp = new WriteableBitmap(400, 200, 96.0, 96.0, PixelFormats.Bgr32, null);
             var croppedBitmap = new CroppedBitmap(sourceImage, sourceRoi);
             int stride = croppedBitmap.PixelWidth * (croppedBitmap.Format.BitsPerPixel / 8);
             var data = new byte[stride * croppedBitmap.PixelHeight];

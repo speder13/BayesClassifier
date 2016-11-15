@@ -16,7 +16,8 @@ using Microsoft.Kinect;
 using System.IO;
 using System.Globalization;
 using ArduinoDriver.SerialProtocol;
-
+using System.IO.Ports;
+using System.Runtime.CompilerServices;
 
 namespace Test2Kinect
 {
@@ -26,10 +27,10 @@ namespace Test2Kinect
     public partial class MainWindow : Window
     {
 
-        //private static string portName = "COM3";
-        //private static int baudRate = 9600;
-        //System.IO.Ports.SerialPort Port = new System.IO.Ports.SerialPort(portName, baudRate);
-        //private ArduinoDriver.ArduinoDriver AD = new ArduinoDriver.ArduinoDriver(portName, true);
+        private static string portName = "COM3";
+        private static int baudRate = 9600;
+        private SerialPort sp = new SerialPort(portName, baudRate, Parity.None, 8, StopBits.One);
+
 
         /// <summary>
         /// Active Kinect sensor
@@ -54,14 +55,14 @@ namespace Test2Kinect
         public MainWindow()
         {
             InitializeComponent();
-            //Port.DataBits = 8;
-            //Port.Open();
-            
-        }
-        
-        
+            sp.DataReceived += portReceiveData; // Add DataReceived Event Handler
+            sp.Open();
 
-        
+        }
+
+
+
+
         /// <summary>
         /// Execute startup tasks
         /// </summary>
@@ -93,7 +94,8 @@ namespace Test2Kinect
                 this.colorPixels = new byte[this.sensor.ColorStream.FramePixelDataLength];
 
                 // This is the bitmap we'll display on-screen
-                this.colorBitmap = new WriteableBitmap(this.sensor.ColorStream.FrameWidth, this.sensor.ColorStream.FrameHeight, 96.0, 96.0, PixelFormats.Bgr32, null);
+                this.colorBitmap = new WriteableBitmap(this.sensor.ColorStream.FrameWidth,
+                    this.sensor.ColorStream.FrameHeight, 96.0, 96.0, PixelFormats.Bgr32, null);
 
                 // Set the image we display to point to the bitmap where we'll put the image data
                 this.Image.Source = this.colorBitmap;
@@ -117,7 +119,7 @@ namespace Test2Kinect
                 // this.statusBarText.Text = Properties.Resources.NoKinectReady;
             }
 
-           
+
 
         }
 
@@ -132,7 +134,7 @@ namespace Test2Kinect
             {
                 this.sensor.Stop();
             }
-            //Port.Close();
+            sp.Close();
         }
 
         /// <summary>
@@ -158,10 +160,10 @@ namespace Test2Kinect
                         {
                             Error = false;
                             this.colorBitmap.WritePixels(
-                            new Int32Rect(0, 0, this.colorBitmap.PixelWidth, this.colorBitmap.PixelHeight),
-                            this.colorPixels,
-                            this.colorBitmap.PixelWidth * sizeof(int),
-                            0);
+                                new Int32Rect(0, 0, this.colorBitmap.PixelWidth, this.colorBitmap.PixelHeight),
+                                this.colorPixels,
+                                this.colorBitmap.PixelWidth*sizeof(int),
+                                0);
                         }
                         catch (System.Runtime.InteropServices.COMException)
                         {
@@ -169,8 +171,8 @@ namespace Test2Kinect
 
                         }
                     }
-                    
-                    
+
+
                 }
             }
         }
@@ -188,7 +190,7 @@ namespace Test2Kinect
                     this.colorBitmap.WritePixels(
                         new Int32Rect(0, 0, this.colorBitmap.PixelWidth, this.colorBitmap.PixelHeight),
                         this.colorPixels,
-                        this.colorBitmap.PixelWidth * sizeof(int),
+                        this.colorBitmap.PixelWidth*sizeof(int),
                         0);
                 }
             }
@@ -199,54 +201,173 @@ namespace Test2Kinect
         /// </summary>
         /// <param name="sender">object sending the event</param>
         /// <param name="e">event arguments</param>
-        private void ButtonScreenshotClick(object sender, RoutedEventArgs e)
-        {
-            
-
-                    if (null == this.sensor)
-                    {
-                        //this.statusBarText.Text = Properties.Resources.ConnectDeviceFirst;
-                        return;
-                    }
-
-                    // create a png bitmap encoder which knows how to save a .png file
-                    BitmapEncoder encoder = new PngBitmapEncoder();
-
-            // create frame from the writable bitmap and add to encoder
-            //encoder.Frames.Add(BitmapFrame.Create(this.colorBitmap));
-                    croppedBitmap = Crop.CopyPixelsTo(this.colorBitmap, new Int32Rect(160, 100, this.colorBitmap.PixelWidth/2, this.colorBitmap.PixelHeight/2), new Int32Rect(0, 0, 200, 200));
-                    encoder.Frames.Add(BitmapFrame.Create(croppedBitmap));
-
-                    this.Image2.Source = encoder.Frames.ElementAt(encoder.Frames.Count - 1);
- 
-            return;
-        }
-
-                     
-
-
-        /* private void ArduinoPicture(object sender, System.IO.Ports.SerialDataReceivedEventArgs e)
+        /* private void ButtonScreenshotClick(object sender, RoutedEventArgs e)
          {
-
-
-                 if (null == this.sensor)
-                 {
-                     //this.statusBarText.Text = Properties.Resources.ConnectDeviceFirst;
-                     return;
-                 }
-
-                 // create a png bitmap encoder which knows how to save a .png file
-                 BitmapEncoder encoder = new PngBitmapEncoder();
-
-                 // create frame from the writable bitmap and add to encoder
-                 encoder.Frames.Add(BitmapFrame.Create(this.colorBitmap));
-                 this.Image2.Source = encoder.Frames.ElementAt(encoder.Frames.Count - 1);
-
-
-
+ 
+ 
+             if (null == this.sensor)
+             {
+                 //this.statusBarText.Text = Properties.Resources.ConnectDeviceFirst;
+                 return;
+             }
+ 
+             // create a png bitmap encoder which knows how to save a .png file
+             BitmapEncoder encoder = new PngBitmapEncoder();
+ 
+             // create frame from the writable bitmap and add to encoder
+             //encoder.Frames.Add(BitmapFrame.Create(this.colorBitmap));
+             croppedBitmap = Crop.CopyPixelsTo(this.colorBitmap, new Int32Rect(160, 100, this.colorBitmap.PixelWidth / 2, this.colorBitmap.PixelHeight / 2), new Int32Rect(0, 0, 400, 200));
+             encoder.Frames.Add(BitmapFrame.Create(croppedBitmap));
+ 
+             this.Image2.Source = encoder.Frames.ElementAt(encoder.Frames.Count - 1);
+ 
              return;
-
          }*/
 
+        private void portReceiveData(object sender, SerialDataReceivedEventArgs e)
+        {
+
+
+            // Serial port from arduino assigned
+            SerialPort portArduino = (SerialPort) sender;
+            //String builder for arduino data created
+            //StringBuilder sb = new StringBuilder();
+
+            // Read from arduino
+            //byte[] buf = new byte[portArduino.BytesToRead];
+            //portArduino.Read(buf, 0, buf.Length);
+            //foreach (Byte b in buf)
+            //{
+            //    sb.Append(b.ToString() + " ");
+            //}
+            //MessageBox.Show(sb.ToString());
+            //if (sb.ToString().StartsWith("49") || sb.ToString().StartsWith("50"))
+            //{
+            //    takePictureRAM();
+                //takePictureSAVE();
+            //}
+
+
+            //Read from arduino
+            string input = portArduino.ReadTo("end");
+            //Split input to get correct command
+            string[] data = input.Split(':');
+            //Switch on command to call correct function
+            switch (data[1].Trim())
+            {
+                case "1":
+                {
+                    takePictureRAM();
+                    break;
+                }
+                case "2":
+                {
+                    takePictureSAVE();
+                    break;
+                }
+                default:
+                {
+                    //Default something.
+                    break;
+                }
+            }
+        }
+
+
+
+
+
+        private void takePictureRAM()
+        {
+            //Check access to UI Thread.
+            if (Application.Current.Dispatcher.CheckAccess())
+            {
+                // create a png bitmap encoder which knows how to save a .png file
+                BitmapEncoder encoder = new PngBitmapEncoder();
+
+                if (null == this.sensor)
+                {
+                    //this.statusBarText.Text = Properties.Resources.ConnectDeviceFirst;
+                    return;
+                }
+                Dispatcher.Invoke(() =>
+                {
+                    croppedBitmap = Crop.CopyPixelsTo(this.colorBitmap,
+                        new Int32Rect(140, 100, 400, 200),
+                        new Int32Rect(0, 0, 400, 200));
+
+                    // create frame from the writable bitmap and add to encoder
+                    //encoder.Frames.Add(BitmapFrame.Create(this.colorBitmap));
+                    encoder.Frames.Add(BitmapFrame.Create(croppedBitmap));
+
+                    // add frame to the window
+                    this.Image2.Source = encoder.Frames.ElementAt(encoder.Frames.Count - 1);
+
+                });
+            }
+            else
+            {
+                //Other wise re-invoke the method with UI thread access
+                Application.Current.Dispatcher.Invoke(new System.Action(() => takePictureRAM()));
+            }
+        }
+
+        private void takePictureSAVE()
+        {
+            //Check access to UI Thread.
+            if (Application.Current.Dispatcher.CheckAccess())
+            {
+                // create a png bitmap encoder which knows how to save a .png file
+                BitmapEncoder encoder = new PngBitmapEncoder();
+                string time = System.DateTime.Now.ToString("hh'-'mm'-'ss", CultureInfo.CurrentUICulture.DateTimeFormat);
+
+                string myPhotos = "C:/Users/bogi1/Desktop/UNI/S5/Projekt/KinectBilleder";
+
+                string path = System.IO.Path.Combine(myPhotos, "KinectSnapshot-" + time + ".png");
+
+
+                if (null == this.sensor)
+                {
+                    //this.statusBarText.Text = Properties.Resources.ConnectDeviceFirst;
+                    return;
+                }
+                Dispatcher.Invoke(() =>
+                {
+                    croppedBitmap = Crop.CopyPixelsTo(this.colorBitmap,
+                        new Int32Rect(140, 100, 400, 200),
+                        new Int32Rect(0, 0, 400, 200));
+
+                    // create frame from the writable bitmap and add to encoder
+                    //encoder.Frames.Add(BitmapFrame.Create(this.colorBitmap));
+                    encoder.Frames.Add(BitmapFrame.Create(croppedBitmap));
+
+                    // add frame to the window
+                    this.Image2.Source = encoder.Frames.ElementAt(encoder.Frames.Count - 1);
+
+
+                    // write the new file to disk
+                    try
+                    {
+                        using (FileStream fs = new FileStream(path, FileMode.Create))
+                        {
+                            encoder.Save(fs);
+                        }
+
+                        //this.statusBarText.Text = string.Format(CultureInfo.InvariantCulture, "{0} {1}", Properties.Resources.ScreenshotWriteSuccess, path);
+                    }
+                    catch (IOException)
+                    {
+                        //this.statusBarText.Text = string.Format(CultureInfo.InvariantCulture, "{0} {1}", Properties.Resources.ScreenshotWriteFailed, path);
+                    }
+                });
+            }
+            else
+            {
+                //Other wise re-invoke the method with UI thread access
+                Application.Current.Dispatcher.Invoke(new System.Action(() => takePictureSAVE()));
+            }
+
+
+        }
     }
 }
