@@ -30,14 +30,15 @@ namespace Machinelearner
         Bitmap currentBitmap;
         Accord.Imaging.Converters.ImageToArray arrayMaker = new Accord.Imaging.Converters.ImageToArray();
         Accord.Imaging.Converters.ArrayToImage imageMaker = new Accord.Imaging.Converters.ArrayToImage(400, 200);
-        List<double[]> valueList = new List<double[]>();
+        
+        //List<double[]> valueList = new List<double[]>();
         Dictionary<int, int> backgrounds = new Dictionary<int, int>();
 
             #endregion Properties
-        public ImageProperties()
+        public ImageProperties(string backgroundpath)
         {
             backgrounds.Add(0, 0);
-            load_background_colors();
+            load_background_colors(backgroundpath);
 
         }
         public int[] trainingOutput { get; set; }
@@ -80,9 +81,9 @@ namespace Machinelearner
             blobs = blobdetect(currentBitmap);
             return currentBitmap;
         }
-        private void load_background_colors()
+        private void load_background_colors(string path)
         {
-            background = Directory.GetFiles("images/Background/", "*.*");
+            background = Directory.GetFiles(path, "*.*");
             foreach (string fil in background)
             {
                 System.Drawing.Image image = System.Drawing.Image.FromFile(fil);
@@ -103,10 +104,10 @@ namespace Machinelearner
             }
         }
         
-        public void load_ball_training()
+        public void load_ball_training(string path)
         {
             int[] running= { 0, 0 };
-            ballImages = Directory.GetFiles("images/Blue/", "*.*");
+            ballImages = Directory.GetFiles(path, "*.*");
             foreach (string fil in ballImages)
             {
                 System.Drawing.Image image = System.Drawing.Image.FromFile(fil);
@@ -118,10 +119,10 @@ namespace Machinelearner
                 arrayCounter++;
             }
         }       
-        public void load_empty_training()
+        public void load_empty_training(string path)
         {
             int[] running = { 0, 0 };
-            emptyImages = Directory.GetFiles("images/Empty/", "*.*");
+            emptyImages = Directory.GetFiles(path, "*.*");
             foreach (string fil in emptyImages)
             {
                 System.Drawing.Image image = System.Drawing.Image.FromFile(fil);
@@ -133,16 +134,17 @@ namespace Machinelearner
                 arrayCounter++;
             }
         }
-        public void load_error_training()
+        public void load_error_training(string path)
         {
             int[] running = { 0, 0 };
-            errors = Directory.GetFiles("images/Error/", "*.*");
+            errors = Directory.GetFiles(path, "*.*");
             foreach (string fil in errors)
             {
                 System.Drawing.Image image = System.Drawing.Image.FromFile(fil);
                 clean_background(image);
                 running[0] = whitePixels;
                 running[1] = blobdetect(currentBitmap);
+                //running[2]= 
                 trainingOutput[arrayCounter] = 2;
                 trainingInput[arrayCounter] = running;
                 arrayCounter++;

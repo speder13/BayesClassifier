@@ -15,9 +15,9 @@ namespace Machinelearner
         ImageProperties properties;
         Accord.MachineLearning.Bayes.NaiveBayesLearning naiveBayes = new Accord.MachineLearning.Bayes.NaiveBayesLearning();
         Accord.MachineLearning.Bayes.NaiveBayes nb;
-        public Machine()
+        public Machine(string backgroundpath)
         {
-            properties = new Machinelearner.ImageProperties();
+            properties = new Machinelearner.ImageProperties(backgroundpath);
         }
         private int[][] _input; //image variables
         public int[][] trainerInput
@@ -32,11 +32,11 @@ namespace Machinelearner
             set { _output = value; }
         }
         
-        public void train_model()
+        public void train_model(string ball, string empty, string error)
         {
-            properties.load_ball_training();
-            properties.load_empty_training();
-            properties.load_error_training();
+            properties.load_ball_training(ball);
+            properties.load_empty_training(empty);
+            properties.load_error_training(error);
             nb = naiveBayes.Learn(properties.trainingInput, properties.trainingOutput);
         }
         public int decide(System.Drawing.Image image)
