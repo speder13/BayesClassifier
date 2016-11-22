@@ -72,7 +72,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ImageProperties.cs" />
-    <Compile Include="Machine.cs" />
+    <Compile Include="..\..\..\..\maskinen\maskinen\Machine.cs">
+      <Link>Machine.cs</Link>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
